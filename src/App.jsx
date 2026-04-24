@@ -14,7 +14,7 @@ const ImmersiveChat = () => {
       const t1 = setTimeout(() => setPhase(1), 500);  // User message pops in
       const t2 = setTimeout(() => setPhase(2), 1500); // Loader pops in
       const t3 = setTimeout(() => setPhase(3), 4500); // AI Response pops in
-      
+
       return () => {
         clearTimeout(t1);
         clearTimeout(t2);
@@ -26,11 +26,11 @@ const ImmersiveChat = () => {
   return (
     <div ref={ref} className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] py-20 px-6">
       <div className="w-full flex flex-col gap-8">
-        
+
         {/* User Message */}
         <AnimatePresence>
           {phase >= 1 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", bounce: 0.4 }}
@@ -46,7 +46,7 @@ const ImmersiveChat = () => {
         {/* Loader */}
         <AnimatePresence>
           {phase === 2 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, filter: "blur(5px)" }}
@@ -63,7 +63,7 @@ const ImmersiveChat = () => {
         {/* AI Response */}
         <AnimatePresence>
           {phase >= 3 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", bounce: 0.3 }}
@@ -72,9 +72,9 @@ const ImmersiveChat = () => {
               <div className="bg-white text-black rounded-[2rem] rounded-tl-sm p-6 md:p-8 w-full md:max-w-[85%] shadow-2xl">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center overflow-hidden border border-zinc-200">
-                    <img 
-                      src="/logo-black.png" 
-                      alt="Aura AI" 
+                    <img
+                      src="/logo-black.png"
+                      alt="Aura AI"
                       className="w-7 h-7 object-contain"
                       onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
                     />
@@ -87,18 +87,18 @@ const ImmersiveChat = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-base md:text-lg font-medium text-zinc-800 mb-6">Report successfully generated and verified.</p>
-                
+
                 <div className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <span className="font-semibold text-sm md:text-base text-zinc-800 flex items-center gap-2">
-                      <BarChart3 className="w-4 h-4"/> Overall Attendance
+                      <BarChart3 className="w-4 h-4" /> Overall Attendance
                     </span>
                     <span className="font-bold text-2xl text-black">92%</span>
                   </div>
                   <div className="w-full bg-zinc-200 rounded-full h-3 overflow-hidden shadow-inner">
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: "92%" }}
                       transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
@@ -376,8 +376,8 @@ export default function App() {
       <section id="ai-features" className="py-24 relative z-10 bg-black overflow-hidden">
         {/* Dynamic Glow Background */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] max-w-[1000px] bg-zinc-800/20 blur-[150px] rounded-full pointer-events-none" />
-        
-        <motion.div 
+
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
@@ -403,7 +403,7 @@ export default function App() {
                 <p className="text-zinc-400 font-light text-base leading-relaxed">Aura actively monitors trends, identifies chronic absences, and structures massive datasets into clear, actionable reporting.</p>
               </div>
             </motion.div>
-            
+
             <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
               <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <div className="relative z-10">
@@ -487,7 +487,7 @@ export default function App() {
               { name: 'Frienzal Labisig', role: 'Backend Developer', img: 'zal.jpg' },
               { name: 'Carlsam M. Puliran Jr.', role: 'Ai Integration Developer', img: 'https://i.pravatar.cc/400?img=9' },
               { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'https://i.pravatar.cc/400?img=9' },
-              { name: 'Anthony Gabriel Tolentino', role: 'Deployment', img: 'https://i.pravatar.cc/400?img=12' }
+              { name: 'Anthony Gabriel Tolentino', role: 'Deployment', img: 'tolentino.jpg' }
             ].map((member, i) => (
               <motion.div
                 key={i}
