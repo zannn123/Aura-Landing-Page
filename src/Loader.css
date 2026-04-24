@@ -18,7 +18,13 @@
   font-weight: 600;
   user-select: none;
   color: #fff;
-  transform: scale(2);
+  transform: scale(2.5);
+}
+
+@media (min-width: 768px) {
+  .loader-wrapper {
+    transform: scale(4);
+  }
 }
 
 .loader-mask {

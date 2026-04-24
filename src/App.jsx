@@ -1,37 +1,119 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database, RotateCcw, Box, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Loader from './Loader';
 
-// --- Antigravity Icons Wave Separator ---
-const IconsWave = () => {
-  const icons = [RotateCcw, Box, Sparkles, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge];
+// --- Immersive Chat Simulation ---
+const ImmersiveChat = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-200px" });
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      const t1 = setTimeout(() => setPhase(1), 500);  // User message pops in
+      const t2 = setTimeout(() => setPhase(2), 1500); // Loader pops in
+      const t3 = setTimeout(() => setPhase(3), 4500); // AI Response pops in
+      
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    }
+  }, [isInView]);
 
   return (
-    <div className="w-full overflow-hidden py-24 flex justify-center items-center gap-3 md:gap-6 opacity-60">
-      {icons.map((Icon, i) => {
-        // Create a sine wave pattern for the initial Y offset
-        const yOffset = Math.sin((i / (icons.length - 1)) * Math.PI * 1.5) * -60;
+    <div ref={ref} className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] py-20 px-6">
+      <div className="w-full flex flex-col gap-8">
         
-        return (
-          <motion.div
-            key={i}
-            initial={{ y: yOffset + 50, opacity: 0 }}
-            whileInView={{ y: yOffset, opacity: 1 }}
-            viewport={{ once: true, margin: "-50px" }}
-            animate={{ 
-              y: [yOffset, yOffset - 10, yOffset],
-            }}
-            transition={{ 
-              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 },
-              opacity: { duration: 0.8 }
-            }}
-            className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-zinc-950/50 border border-zinc-800 flex items-center justify-center text-zinc-400 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.03)]"
-          >
-            <Icon className="w-5 h-5 md:w-6 md:h-6" />
-          </motion.div>
-        );
-      })}
+        {/* User Message */}
+        <AnimatePresence>
+          {phase >= 1 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", bounce: 0.4 }}
+              className="flex justify-end"
+            >
+              <div className="bg-zinc-900 border border-zinc-800 text-white rounded-3xl rounded-tr-sm px-6 py-4 text-base md:text-lg max-w-[85%] md:max-w-[75%] shadow-lg leading-relaxed">
+                Can you generate the monthly attendance report for Computer Science Section 3?
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Loader */}
+        <AnimatePresence>
+          {phase === 2 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, filter: "blur(5px)" }}
+              className="flex justify-center py-2"
+            >
+              {/* Scale down the loader slightly to fit the chat flow */}
+              <div className="transform scale-75 md:scale-100 origin-center">
+                <Loader />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* AI Response */}
+        <AnimatePresence>
+          {phase >= 3 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", bounce: 0.3 }}
+              className="flex justify-start"
+            >
+              <div className="bg-white text-black rounded-[2rem] rounded-tl-sm p-6 md:p-8 w-full md:max-w-[85%] shadow-2xl">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center overflow-hidden border border-zinc-200">
+                    <img 
+                      src="/logo-black.png" 
+                      alt="Aura AI" 
+                      className="w-7 h-7 object-contain"
+                      onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-900">Aura AI</h3>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <Database className="w-3 h-3 text-zinc-500" />
+                      <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider">System Administrator</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-base md:text-lg font-medium text-zinc-800 mb-6">Report successfully generated and verified.</p>
+                
+                <div className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-semibold text-sm md:text-base text-zinc-800 flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4"/> Overall Attendance
+                    </span>
+                    <span className="font-bold text-2xl text-black">92%</span>
+                  </div>
+                  <div className="w-full bg-zinc-200 rounded-full h-3 overflow-hidden shadow-inner">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: "92%" }}
+                      transition={{ duration: 1.5, ease: "easeOut", delay: 0.2 }}
+                      className="bg-black h-full rounded-full relative"
+                    >
+                      <div className="absolute inset-0 bg-white/20 w-full h-full animate-[pulse_2s_ease-in-out_infinite]" />
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+      </div>
     </div>
   );
 };
@@ -285,22 +367,13 @@ export default function App() {
         </motion.div>
       </section>
 
-      {/* Separators: Antigravity Floating Icons and Glowing Loader */}
-      <div className="relative z-10 bg-black pt-10 pb-20 border-t border-zinc-900">
-        <IconsWave />
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="mt-10"
-        >
-          <Loader />
-        </motion.div>
-      </div>
+      {/* Immersive AI Sequence */}
+      <section id="ai-chat" className="pt-20 pb-10 relative z-10 bg-black overflow-hidden border-t border-zinc-900 min-h-[80vh] flex items-center">
+        <ImmersiveChat />
+      </section>
 
-      {/* Aura AI Immersive Section */}
-      <section id="ai" className="py-32 relative z-10 bg-black overflow-hidden border-t border-zinc-900">
+      {/* Aura AI Capabilities Section */}
+      <section id="ai-features" className="py-24 relative z-10 bg-black overflow-hidden">
         {/* Dynamic Glow Background */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] max-w-[1000px] bg-zinc-800/20 blur-[150px] rounded-full pointer-events-none" />
         
@@ -320,82 +393,25 @@ export default function App() {
             <p className="text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed">Not just a chatbot. Aura AI actively analyzes complex attendance patterns, autonomously generates official reports, and has deep, secure access to your institutional data permissions.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Main AI Chat Interface Mockup */}
-            <motion.div 
-              variants={scaleUp}
-              className="lg:col-span-7 relative"
-            >
-              <div className="h-full rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 overflow-hidden relative shadow-2xl flex flex-col group">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                <div className="flex items-center gap-5 mb-10 relative z-10">
-                  <div className="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                    <Bot className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Aura Intelligence</h3>
-                    <p className="text-sm text-zinc-500 font-medium tracking-wide">Secure Context-Aware Assistant</p>
-                  </div>
-                </div>
-
-                <div className="flex-1 space-y-8 relative z-10">
-                  {/* User Message */}
-                  <div className="flex justify-end">
-                    <div className="bg-zinc-800 text-white rounded-[2rem] rounded-tr-md px-6 py-4 max-w-[85%] text-base shadow-lg">
-                      Can you generate the monthly attendance report for Computer Science Section 3?
-                    </div>
-                  </div>
-                  {/* AI Response */}
-                  <div className="flex justify-start">
-                    <div className="bg-white text-black rounded-[2rem] rounded-tl-md px-6 py-6 max-w-[90%] text-base space-y-4 shadow-xl">
-                      <p className="font-semibold text-zinc-800">Report generated and verified.</p>
-                      
-                      <div className="bg-zinc-100 rounded-2xl p-4 border border-zinc-200 shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-bold text-sm text-zinc-800 flex items-center gap-2"><BarChart3 className="w-4 h-4"/> Overall Attendance</span>
-                          <span className="font-black text-black">92%</span>
-                        </div>
-                        <div className="w-full bg-zinc-200 rounded-full h-2.5">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            whileInView={{ width: "92%" }}
-                            transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-                            className="bg-black h-2.5 rounded-full"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 bg-zinc-100 px-3 py-2 rounded-xl inline-flex">
-                        <Database className="w-3 h-3" />
-                        <span>Permission level: Administrator</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* AI Capabilities Cards */}
+            <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
+              <div className="absolute inset-0 bg-gradient-to-bl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10">
+                <FileText className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
+                <h3 className="text-2xl font-bold text-white mb-4">Deep Data Analysis</h3>
+                <p className="text-zinc-400 font-light text-base leading-relaxed">Aura actively monitors trends, identifies chronic absences, and structures massive datasets into clear, actionable reporting.</p>
               </div>
             </motion.div>
-
-            {/* AI Capabilities Side Cards */}
-            <div className="lg:col-span-5 flex flex-col gap-8">
-              <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
-                <div className="absolute inset-0 bg-gradient-to-bl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="relative z-10">
-                  <FileText className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
-                  <h3 className="text-2xl font-bold text-white mb-4">Deep Data Analysis</h3>
-                  <p className="text-zinc-400 font-light text-base leading-relaxed">Aura actively monitors trends, identifies chronic absences, and structures massive datasets into clear, actionable reporting.</p>
-                </div>
-              </motion.div>
-              
-              <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                <div className="relative z-10">
-                  <Shield className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
-                  <h3 className="text-2xl font-bold text-white mb-4">System-Level Autonomy</h3>
-                  <p className="text-zinc-400 font-light text-base leading-relaxed">It doesn't just read data. With verified clearance, the AI can execute commands, create official records, and modify system state.</p>
-                </div>
-              </motion.div>
-            </div>
+            
+            <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
+              <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10">
+                <Shield className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
+                <h3 className="text-2xl font-bold text-white mb-4">System-Level Autonomy</h3>
+                <p className="text-zinc-400 font-light text-base leading-relaxed">It doesn't just read data. With verified clearance, the AI can execute commands, create official records, and modify system state.</p>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
       </section>
