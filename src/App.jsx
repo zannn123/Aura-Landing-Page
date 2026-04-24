@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2 } from 'lucide-react';
+import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // --- Framer Motion Variants ---
@@ -251,6 +251,107 @@ export default function App() {
         </motion.div>
       </section>
 
+      {/* Aura AI Immersive Section */}
+      <section id="ai" className="py-32 relative z-10 bg-black overflow-hidden border-t border-zinc-900">
+        {/* Dynamic Glow Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] max-w-[1000px] bg-zinc-800/20 blur-[150px] rounded-full pointer-events-none" />
+        
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+          className="max-w-7xl mx-auto px-6 relative z-10"
+        >
+          <motion.div variants={fadeInUp} className="text-center mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zinc-700 bg-black/50 backdrop-blur-md text-sm font-medium text-white mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+              <Sparkles className="w-4 h-4 text-zinc-300" />
+              Meet Aura AI
+            </div>
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight">Your intelligent <br className="hidden md:block" />academic engine.</h2>
+            <p className="text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed">Not just a chatbot. Aura AI actively analyzes complex attendance patterns, autonomously generates official reports, and has deep, secure access to your institutional data permissions.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main AI Chat Interface Mockup */}
+            <motion.div 
+              variants={scaleUp}
+              className="lg:col-span-7 relative"
+            >
+              <div className="h-full rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 overflow-hidden relative shadow-2xl flex flex-col group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                <div className="flex items-center gap-5 mb-10 relative z-10">
+                  <div className="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    <Bot className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Aura Intelligence</h3>
+                    <p className="text-sm text-zinc-500 font-medium tracking-wide">Secure Context-Aware Assistant</p>
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-8 relative z-10">
+                  {/* User Message */}
+                  <div className="flex justify-end">
+                    <div className="bg-zinc-800 text-white rounded-[2rem] rounded-tr-md px-6 py-4 max-w-[85%] text-base shadow-lg">
+                      Can you generate the monthly attendance report for Computer Science Section 3?
+                    </div>
+                  </div>
+                  {/* AI Response */}
+                  <div className="flex justify-start">
+                    <div className="bg-white text-black rounded-[2rem] rounded-tl-md px-6 py-6 max-w-[90%] text-base space-y-4 shadow-xl">
+                      <p className="font-semibold text-zinc-800">Report generated and verified.</p>
+                      
+                      <div className="bg-zinc-100 rounded-2xl p-4 border border-zinc-200 shadow-sm">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-bold text-sm text-zinc-800 flex items-center gap-2"><BarChart3 className="w-4 h-4"/> Overall Attendance</span>
+                          <span className="font-black text-black">92%</span>
+                        </div>
+                        <div className="w-full bg-zinc-200 rounded-full h-2.5">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            whileInView={{ width: "92%" }}
+                            transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
+                            className="bg-black h-2.5 rounded-full"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 bg-zinc-100 px-3 py-2 rounded-xl inline-flex">
+                        <Database className="w-3 h-3" />
+                        <span>Permission level: Administrator</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* AI Capabilities Side Cards */}
+            <div className="lg:col-span-5 flex flex-col gap-8">
+              <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
+                <div className="absolute inset-0 bg-gradient-to-bl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="relative z-10">
+                  <FileText className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
+                  <h3 className="text-2xl font-bold text-white mb-4">Deep Data Analysis</h3>
+                  <p className="text-zinc-400 font-light text-base leading-relaxed">Aura actively monitors trends, identifies chronic absences, and structures massive datasets into clear, actionable reporting.</p>
+                </div>
+              </motion.div>
+              
+              <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="relative z-10">
+                  <Shield className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
+                  <h3 className="text-2xl font-bold text-white mb-4">System-Level Autonomy</h3>
+                  <p className="text-zinc-400 font-light text-base leading-relaxed">It doesn't just read data. With verified clearance, the AI can execute commands, create official records, and modify system state.</p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
       {/* Features Section */}
       <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900">
         <motion.div
@@ -317,10 +418,10 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               { name: 'Lance D Celicious', role: 'Iterator Manager', img: 'lance.jpg' },
-              { name: 'Meeko Pauleonard Tan', role: 'Project Manager', img: 'meeko.jpg' },
+              { name: 'Meeko Pauleonard Tan', role: 'Project Manager', img: 'tan.jpg' },
               { name: 'Gloryzann H Aclao', role: 'Frontend', img: 'zann.jpg' },
               { name: 'Frienzal Labisig', role: 'Backend Developer', img: 'zal.jpg' },
-              { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'https://i.pravatar.cc/400?img=9' },
+              { name: 'Carlsam M. Puliran Jr.', role: 'Ai Integration Developer', img: 'https://i.pravatar.cc/400?img=9' },
               { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'https://i.pravatar.cc/400?img=9' },
               { name: 'Anthony Gabriel Tolentino', role: 'Deployment', img: 'https://i.pravatar.cc/400?img=12' }
             ].map((member, i) => (
