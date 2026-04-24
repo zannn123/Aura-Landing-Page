@@ -151,20 +151,123 @@ const scaleUp = {
   }
 };
 
+// --- Early Access Modal ---
+const EarlyAccessModal = ({ isOpen, onClose }) => {
+  const [feedback, setFeedback] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!feedback.trim()) return;
+    
+    // Using mailto to trigger email client
+    const subject = encodeURIComponent("Aura Early Access Feedback");
+    const body = encodeURIComponent(feedback);
+    window.location.href = `mailto:auraautomessage@gmail.com?subject=${subject}&body=${body}`;
+    
+    setSubmitted(true);
+    setTimeout(() => {
+       onClose();
+    }, 3000);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-xl"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", bounce: 0.3 }}
+            className="w-full max-w-md bg-zinc-950 border border-zinc-800 rounded-[2.5rem] p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+          >
+            {/* Glow effect */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 blur-[50px] rounded-full pointer-events-none" />
+            
+            <button 
+              onClick={onClose}
+              className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors z-20"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="mb-8 relative z-10">
+              <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center mb-6 shadow-lg shadow-white/10">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3 tracking-tight">Early Release Access</h2>
+              <p className="text-zinc-400 font-light text-sm leading-relaxed">
+                Welcome to Aura! You are experiencing an early development build. We'd love your feedback to help shape the future of the platform.
+              </p>
+            </div>
+
+            {!submitted ? (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
+                <textarea 
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Share your thoughts, feature requests, or report bugs..."
+                  className="w-full h-32 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all resize-none text-sm"
+                />
+                <button 
+                  type="submit"
+                  className="w-full bg-white text-black font-bold py-4 rounded-full hover:bg-zinc-200 hover:-translate-y-1 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Send Feedback
+                </button>
+              </form>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl p-6 text-center flex flex-col items-center gap-3 relative z-10"
+              >
+                <CheckCircle2 className="w-8 h-8" />
+                <p className="font-medium text-sm">Thank you! Opening your mail client...</p>
+              </motion.div>
+            )}
+
+            <p className="text-xs text-zinc-600 text-center mt-6 relative z-10">
+              Or contact our team directly in the Team section below.
+            </p>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showEarlyAccess, setShowEarlyAccess] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Show early access modal after 2 seconds
+    const timer = setTimeout(() => setShowEarlyAccess(true), 2000);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-hidden">
+      <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
+      
       {/* Background gradients for visual depth */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <motion.div
