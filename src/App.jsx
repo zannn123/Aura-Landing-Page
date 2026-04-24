@@ -40,7 +40,7 @@ const ImmersiveChat = () => {
               className="flex justify-end origin-bottom-right"
             >
               <div className="bg-zinc-900 border border-zinc-800 text-white rounded-3xl rounded-tr-sm px-6 py-4 text-base md:text-lg max-w-[85%] md:max-w-[75%] shadow-lg leading-relaxed">
-                Can you generate the monthly attendance report for Computer Science Section 3?
+                Can you generate the monthly attendance report for Computer Engineering BSCPE 2?
               </div>
             </motion.div>
           )}
