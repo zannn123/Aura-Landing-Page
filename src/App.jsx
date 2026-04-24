@@ -159,13 +159,13 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!feedback.trim()) return;
-    
+
     try {
       // Use the raw email endpoint to ensure delivery. 
       // Formsubmit will process this asynchronously.
       const response = await fetch("https://formsubmit.co/ajax/auraautomessage@gmail.com", {
         method: "POST",
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
@@ -179,7 +179,7 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
       if (response.ok) {
         setSubmitted(true);
         setTimeout(() => {
-           onClose();
+          onClose();
         }, 3000);
       } else {
         // Fallback to mailto if API fails
@@ -199,13 +199,13 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-black/60 backdrop-blur-xl"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
@@ -214,8 +214,8 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
           >
             {/* Glow effect */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 blur-[50px] rounded-full pointer-events-none" />
-            
-            <button 
+
+            <button
               onClick={onClose}
               className="absolute top-6 right-6 text-zinc-500 hover:text-white transition-colors z-20"
             >
@@ -234,13 +234,13 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
 
             {!submitted ? (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
-                <textarea 
+                <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder="Share your thoughts, feature requests, or report bugs..."
                   className="w-full h-32 bg-zinc-900/50 border border-zinc-800 rounded-2xl p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all resize-none text-sm"
                 />
-                <button 
+                <button
                   type="submit"
                   className="w-full bg-white text-black font-bold py-4 rounded-full hover:bg-zinc-200 hover:-translate-y-1 transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2"
                 >
@@ -249,7 +249,7 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
                 </button>
               </form>
             ) : (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-white/10 border border-white/20 text-white rounded-2xl p-6 text-center flex flex-col items-center gap-3 relative z-10"
@@ -279,10 +279,10 @@ export default function App() {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    
+
     // Show early access modal after 2 seconds
     const timer = setTimeout(() => setShowEarlyAccess(true), 2000);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       clearTimeout(timer);
@@ -292,7 +292,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-hidden">
       <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
-      
+
       {/* Background gradients for visual depth */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -617,8 +617,8 @@ export default function App() {
               { name: 'Meeko Pauleonard Tan', role: 'Project Manager', img: 'tan.jpg' },
               { name: 'Gloryzann H Aclao', role: 'Frontend', img: 'zann.jpg' },
               { name: 'Frienzal Labisig', role: 'Backend Developer', img: 'zal.jpg' },
-              { name: 'Carlsam M. Puliran Jr.', role: 'Ai Integration Developer', img: 'https://i.pravatar.cc/400?img=9' },
-              { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'https://i.pravatar.cc/400?img=9' },
+              { name: 'Carlsam M. Puliran Jr.', role: 'Ai Integration Developer', img: 'cmp.png' },
+              { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'gab.jpg' },
               { name: 'Anthony Gabriel Tolentino', role: 'Deployment', img: 'tolentino.jpg' }
             ].map((member, i) => (
               <motion.div
