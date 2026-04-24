@@ -163,8 +163,8 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
     setSubmitted(true); // Show success state immediately for snappy UX
 
     try {
-      // Send the feedback silently in the background
-      await fetch("https://formsubmit.co/ajax/auraautomessage@gmail.com", {
+      // Send the feedback silently in the background using the secure hash
+      await fetch("https://formsubmit.co/ajax/xevilu", {
         method: "POST",
         headers: { 
           'Content-Type': 'application/json',
