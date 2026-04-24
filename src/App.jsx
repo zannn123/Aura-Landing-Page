@@ -23,6 +23,9 @@ const ImmersiveChat = () => {
     }
   }, [isInView]);
 
+  // Smooth easing curve for Pro Max feel
+  const smoothEase = [0.23, 1, 0.32, 1];
+
   return (
     <div ref={ref} className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] py-20 px-6">
       <div className="w-full flex flex-col gap-8">
@@ -31,10 +34,10 @@ const ImmersiveChat = () => {
         <AnimatePresence>
           {phase >= 1 && (
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: 15, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", bounce: 0.4 }}
-              className="flex justify-end"
+              transition={{ duration: 0.6, ease: smoothEase }}
+              className="flex justify-end origin-bottom-right"
             >
               <div className="bg-zinc-900 border border-zinc-800 text-white rounded-3xl rounded-tr-sm px-6 py-4 text-base md:text-lg max-w-[85%] md:max-w-[75%] shadow-lg leading-relaxed">
                 Can you generate the monthly attendance report for Computer Science Section 3?
@@ -47,9 +50,10 @@ const ImmersiveChat = () => {
         <AnimatePresence>
           {phase === 2 && (
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9, filter: "blur(5px)" }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+              transition={{ duration: 0.4, ease: smoothEase }}
               className="flex justify-center py-2"
             >
               {/* Scale down the loader slightly to fit the chat flow */}
@@ -64,10 +68,10 @@ const ImmersiveChat = () => {
         <AnimatePresence>
           {phase >= 3 && (
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, y: 15, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", bounce: 0.3 }}
-              className="flex justify-start"
+              transition={{ duration: 0.7, ease: smoothEase }}
+              className="flex justify-start origin-top-left"
             >
               <div className="bg-white text-black rounded-[2rem] rounded-tl-sm p-6 md:p-8 w-full md:max-w-[85%] shadow-2xl">
                 <div className="flex items-center gap-4 mb-6">
