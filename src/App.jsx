@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database, RotateCcw, Box, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge } from 'lucide-react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Loader from './Loader';
+import Beams from './Beams';
 
 // --- Immersive Chat Simulation ---
 const ImmersiveChat = () => {
@@ -295,6 +296,18 @@ export default function App() {
 
       {/* Background gradients for visual depth */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 z-0">
+          <Beams
+            beamWidth={2}
+            beamHeight={15}
+            beamNumber={12}
+            lightColor="#ffffff"
+            speed={2}
+            noiseIntensity={1.75}
+            scale={0.2}
+            rotation={49}
+          />
+        </div>
         <motion.div
           animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.1, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
