@@ -156,16 +156,30 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
   const [feedback, setFeedback] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!feedback.trim()) return;
     
-    // Using mailto to trigger email client
-    const subject = encodeURIComponent("Aura Early Access Feedback");
-    const body = encodeURIComponent(feedback);
-    window.location.href = `mailto:auraautomessage@gmail.com?subject=${subject}&body=${body}`;
+    setSubmitted(true); // Show success state immediately for snappy UX
+
+    try {
+      // Send the feedback silently in the background
+      await fetch("https://formsubmit.co/ajax/auraautomessage@gmail.com", {
+        method: "POST",
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: "🔥 New Aura Early Access Feedback",
+          message: feedback,
+          _captcha: "false"
+        })
+      });
+    } catch (error) {
+      console.error("Failed to send feedback:", error);
+    }
     
-    setSubmitted(true);
     setTimeout(() => {
        onClose();
     }, 3000);
@@ -227,10 +241,10 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl p-6 text-center flex flex-col items-center gap-3 relative z-10"
+                className="bg-white/10 border border-white/20 text-white rounded-2xl p-6 text-center flex flex-col items-center gap-3 relative z-10"
               >
-                <CheckCircle2 className="w-8 h-8" />
-                <p className="font-medium text-sm">Thank you! Opening your mail client...</p>
+                <CheckCircle2 className="w-8 h-8 text-green-400" />
+                <p className="font-medium text-sm">Feedback sent successfully!</p>
               </motion.div>
             )}
 
