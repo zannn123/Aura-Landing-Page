@@ -1,6 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database } from 'lucide-react';
+import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database, RotateCcw, Box, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Loader from './Loader';
+
+// --- Antigravity Icons Wave Separator ---
+const IconsWave = () => {
+  const icons = [RotateCcw, Box, Sparkles, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge];
+
+  return (
+    <div className="w-full overflow-hidden py-24 flex justify-center items-center gap-3 md:gap-6 opacity-60">
+      {icons.map((Icon, i) => {
+        // Create a sine wave pattern for the initial Y offset
+        const yOffset = Math.sin((i / (icons.length - 1)) * Math.PI * 1.5) * -60;
+        
+        return (
+          <motion.div
+            key={i}
+            initial={{ y: yOffset + 50, opacity: 0 }}
+            whileInView={{ y: yOffset, opacity: 1 }}
+            viewport={{ once: true, margin: "-50px" }}
+            animate={{ 
+              y: [yOffset, yOffset - 10, yOffset],
+            }}
+            transition={{ 
+              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 },
+              opacity: { duration: 0.8 }
+            }}
+            className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-zinc-950/50 border border-zinc-800 flex items-center justify-center text-zinc-400 backdrop-blur-sm shadow-[0_0_20px_rgba(255,255,255,0.03)]"
+          >
+            <Icon className="w-5 h-5 md:w-6 md:h-6" />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+};
 
 // --- Framer Motion Variants ---
 const fadeInUp = {
@@ -250,6 +284,20 @@ export default function App() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/5 blur-[100px] -z-10 rounded-full" />
         </motion.div>
       </section>
+
+      {/* Separators: Antigravity Floating Icons and Glowing Loader */}
+      <div className="relative z-10 bg-black pt-10 pb-20 border-t border-zinc-900">
+        <IconsWave />
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="mt-10"
+        >
+          <Loader />
+        </motion.div>
+      </div>
 
       {/* Aura AI Immersive Section */}
       <section id="ai" className="py-32 relative z-10 bg-black overflow-hidden border-t border-zinc-900">
