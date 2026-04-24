@@ -267,7 +267,7 @@ export default function App() {
 
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
             <a
-              href="/Aura-App.apk"
+              href="/app-release.apk"
               download
               className="group relative flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white text-black rounded-2xl font-semibold hover:bg-zinc-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] overflow-hidden"
             >
@@ -544,7 +544,7 @@ export default function App() {
 
           <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <a
-              href="/Aura-App.apk"
+              href="/app-release.apk"
               download
               className="w-full sm:w-auto px-10 py-6 bg-black text-white rounded-[2rem] font-bold text-xl hover:bg-zinc-800 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 group"
             >
