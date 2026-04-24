@@ -160,11 +160,10 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     if (!feedback.trim()) return;
     
-    setSubmitted(true); // Show success state immediately for snappy UX
-
     try {
-      // Send the feedback silently in the background using the secure hash
-      await fetch("https://formsubmit.co/ajax/xevilu", {
+      // Use the raw email endpoint to ensure delivery. 
+      // Formsubmit will process this asynchronously.
+      const response = await fetch("https://formsubmit.co/ajax/auraautomessage@gmail.com", {
         method: "POST",
         headers: { 
           'Content-Type': 'application/json',
@@ -176,13 +175,25 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
           _captcha: "false"
         })
       });
+
+      if (response.ok) {
+        setSubmitted(true);
+        setTimeout(() => {
+           onClose();
+        }, 3000);
+      } else {
+        // Fallback to mailto if API fails
+        throw new Error("API failed");
+      }
     } catch (error) {
-      console.error("Failed to send feedback:", error);
+      console.error("Failed to send feedback silently:", error);
+      // Fallback: Open mail client if FormSubmit is blocked or fails
+      const subject = encodeURIComponent("Aura Early Access Feedback");
+      const body = encodeURIComponent(feedback);
+      window.location.href = `mailto:auraautomessage@gmail.com?subject=${subject}&body=${body}`;
+      setSubmitted(true);
+      setTimeout(() => onClose(), 3000);
     }
-    
-    setTimeout(() => {
-       onClose();
-    }, 3000);
   };
 
   return (
