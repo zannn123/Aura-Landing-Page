@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database, RotateCcw, Box, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge } from 'lucide-react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { Download, Apple, Smartphone, Shield, Zap, Lock, Star, Menu, X, CheckCircle2, Globe, MessageCircle, Share2, Bot, Sparkles, BarChart3, FileText, Database, RotateCcw, Box, Command, Code, Folder, GitBranch, Terminal, Layout, Key, GitMerge, MapPin, ScanFace } from 'lucide-react';
+import { motion, useInView, useReducedMotion, AnimatePresence } from 'framer-motion';
 import Loader from './Loader';
-import Beams from './Beams';
+import TextPressure from './TextPressure';
+import TrueFocus from './TrueFocus';
+import ScrollFloat from './ScrollFloat';
+
+const Beams = React.lazy(() => import('./Beams'));
 
 // --- Immersive Chat Simulation ---
 const ImmersiveChat = () => {
@@ -123,6 +127,177 @@ const ImmersiveChat = () => {
   );
 };
 
+// --- Face Attendance Scan Simulation ---
+const FaceAttendanceScan = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-30% 0px -30% 0px" });
+  const shouldReduceMotion = useReducedMotion();
+  const isPerformanceMode = usePerformanceMode();
+  const [phase, setPhase] = useState(0);
+  const smoothEase = [0.23, 1, 0.32, 1];
+  const stages = [
+    {
+      label: 'Checking In...',
+      icon: MapPin,
+      detail: 'Location confirmed',
+      kind: 'anchor'
+    },
+    {
+      label: 'Scanning Face',
+      icon: ScanFace,
+      detail: 'Matching biometric profile',
+      kind: 'scan'
+    },
+    {
+      label: 'Attendance Marked.',
+      icon: CheckCircle2,
+      detail: 'Synced to class record',
+      kind: 'done'
+    }
+  ];
+  const activeStage = stages[Math.min(phase, stages.length - 1)];
+  const ActiveIcon = activeStage.icon;
+
+  useEffect(() => {
+    if (!isInView) return undefined;
+    if (shouldReduceMotion || isPerformanceMode) {
+      setPhase(3);
+      return undefined;
+    }
+
+    const timers = [
+      setTimeout(() => setPhase(1), 1300),
+      setTimeout(() => setPhase(2), 2700),
+      setTimeout(() => setPhase(3), 4100)
+    ];
+
+    return () => timers.forEach(clearTimeout);
+  }, [isInView, shouldReduceMotion, isPerformanceMode]);
+
+  return (
+    <div ref={ref} className="relative bg-black py-16 md:py-24">
+      <div className="relative flex min-h-[72svh] items-center justify-center overflow-hidden px-6 py-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,255,255,0.14),transparent_34%)]" />
+        <div className="absolute inset-0 bg-black/55" />
+
+        <AnimatePresence mode="wait">
+          {phase < 3 ? (
+            <motion.div
+              key="seamless-sync-card"
+              initial={{ opacity: 0, y: 40, scale: 0.94, filter: "blur(12px)" }}
+              animate={{
+                opacity: 1,
+                y: 0,
+                scale: phase === 2 ? [1, 1.025, 1] : 1,
+                filter: "blur(0px)"
+              }}
+              exit={{ opacity: 0, y: -30, scale: 0.96, filter: "blur(14px)" }}
+              transition={{ duration: 0.7, ease: smoothEase }}
+              className="relative z-10 w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/15 bg-white/[0.07] p-8 text-center shadow-[0_30px_100px_rgba(0,0,0,0.55)] backdrop-blur-2xl md:p-12"
+            >
+              <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" />
+
+              <div className="relative mx-auto flex h-36 w-36 items-center justify-center rounded-[2rem] border border-white/15 bg-black/40 md:h-44 md:w-44">
+                {activeStage.kind === 'anchor' && (
+                  <>
+                    <motion.div
+                      animate={{ opacity: [0, 0.55, 0], scale: [0.82, 1.35, 1.75] }}
+                      transition={{ duration: 2.1, repeat: Infinity, ease: "easeOut" }}
+                      className="absolute inset-6 rounded-full border border-white/35"
+                    />
+                    <motion.div
+                      animate={{ opacity: [0.1, 0.35, 0.1], scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2.1, repeat: Infinity, ease: "easeInOut" }}
+                      className="absolute inset-0 rounded-[2rem] bg-white/10 blur-xl"
+                    />
+                  </>
+                )}
+
+                {activeStage.kind === 'scan' && (
+                  <motion.div
+                    initial={{ y: -52, opacity: 0 }}
+                    animate={{ y: 52, opacity: [0, 1, 0] }}
+                    transition={{ duration: 0.9, repeat: 1, ease: "easeInOut" }}
+                    className="absolute left-6 right-6 h-12 bg-gradient-to-b from-transparent via-white/45 to-transparent blur-sm"
+                  />
+                )}
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeStage.label}
+                    initial={{ opacity: 0, scale: 0.72, rotate: -8, filter: "blur(8px)" }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 0.72, rotate: 8, filter: "blur(8px)" }}
+                    transition={{ duration: 0.45, ease: smoothEase }}
+                    className={`relative z-10 flex h-20 w-20 items-center justify-center rounded-[1.5rem] ${activeStage.kind === 'done' ? 'bg-white text-black' : 'bg-white/10 text-white'}`}
+                  >
+                    <ActiveIcon className="h-10 w-10" strokeWidth={1.7} />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${activeStage.label}-copy`}
+                  initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -18, filter: "blur(8px)" }}
+                  transition={{ duration: 0.45, ease: smoothEase }}
+                  className="mt-8"
+                >
+                  <p className="text-4xl font-black tracking-tight text-white md:text-6xl">{activeStage.label}</p>
+                  <p className="mt-4 text-sm font-bold uppercase tracking-[0.22em] text-zinc-500">{activeStage.detail}</p>
+                </motion.div>
+              </AnimatePresence>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.35 }}
+                className="mx-auto mt-8 max-w-sm text-base leading-relaxed text-zinc-300 md:text-lg"
+              >
+                Using Insight for reliable, accurate face scan.
+              </motion.p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="seamless-sync-statement"
+              initial={{ opacity: 0, scale: 0.94, filter: "blur(14px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 1.04, filter: "blur(10px)" }}
+              transition={{ duration: 0.8, ease: smoothEase }}
+              className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-0 text-center"
+            >
+              {[
+                { text: 'Fast attendance.', height: 'h-[70px] sm:h-[88px] md:h-[112px]', min: 28, max: 104 },
+                { text: 'Reliable.', height: 'h-[64px] sm:h-[78px] md:h-[100px]', min: 34, max: 104 },
+                { text: 'Secure.', height: 'h-[64px] sm:h-[78px] md:h-[100px]', min: 34, max: 104 }
+              ].map((line) => (
+                <div key={line.text} className={`w-full max-w-[92vw] ${line.height}`}>
+                  <TextPressure
+                    text={line.text}
+                    flex={false}
+                    alpha={false}
+                    stroke={false}
+                    width={true}
+                    weight={true}
+                    italic={true}
+                    textColor="#ffffff"
+                    strokeColor="#ffffff"
+                    minFontSize={line.min}
+                    maxFontSize={line.max}
+                    disableAnimation={isPerformanceMode}
+                  />
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
 // --- Framer Motion Variants ---
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -150,6 +325,32 @@ const scaleUp = {
     scale: 1,
     transition: { duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }
   }
+};
+
+const usePerformanceMode = () => {
+  const [isPerformanceMode, setIsPerformanceMode] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
+  useEffect(() => {
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePerformanceMode = () => {
+      setIsPerformanceMode(coarsePointer.matches || reducedMotion.matches);
+    };
+
+    updatePerformanceMode();
+    coarsePointer.addEventListener('change', updatePerformanceMode);
+    reducedMotion.addEventListener('change', updatePerformanceMode);
+
+    return () => {
+      coarsePointer.removeEventListener('change', updatePerformanceMode);
+      reducedMotion.removeEventListener('change', updatePerformanceMode);
+    };
+  }, []);
+
+  return isPerformanceMode;
 };
 
 // --- Early Access Modal ---
@@ -255,7 +456,7 @@ const EarlyAccessModal = ({ isOpen, onClose }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-white/10 border border-white/20 text-white rounded-2xl p-6 text-center flex flex-col items-center gap-3 relative z-10"
               >
-                <CheckCircle2 className="w-8 h-8 text-green-400" />
+                <CheckCircle2 className="w-8 h-8 text-white" />
                 <p className="font-medium text-sm">Feedback sent successfully!</p>
               </motion.div>
             )}
@@ -274,6 +475,7 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
+  const isPerformanceMode = usePerformanceMode();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -297,27 +499,37 @@ export default function App() {
       {/* Background gradients for visual depth */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 z-0">
-          <Beams
-            beamWidth={2}
-            beamHeight={15}
-            beamNumber={12}
-            lightColor="#ffffff"
-            speed={2}
-            noiseIntensity={1.75}
-            scale={0.2}
-            rotation={49}
-          />
+          {!isPerformanceMode ? (
+            <React.Suspense fallback={null}>
+              <Beams
+                beamWidth={2}
+                beamHeight={15}
+                beamNumber={12}
+                lightColor="#ffffff"
+                speed={2}
+                noiseIntensity={1.75}
+                scale={0.2}
+                rotation={49}
+              />
+            </React.Suspense>
+          ) : (
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_42%)]" />
+          )}
         </div>
-        <motion.div
-          animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen"
-        />
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.2, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen"
-        />
+        {!isPerformanceMode && (
+          <>
+            <motion.div
+              animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.1, 1] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen"
+            />
+            <motion.div
+              animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.2, 1] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen"
+            />
+          </>
+        )}
       </div>
 
       {/* Navigation */}
@@ -463,49 +675,14 @@ export default function App() {
             className="relative mx-auto w-[320px] h-[650px] bg-black border-[8px] border-zinc-800 rounded-[3.5rem] shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-hidden"
           >
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-zinc-800 rounded-b-xl z-20" />
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-black z-0" />
+            <div className="absolute inset-0 bg-black z-0" />
 
-            {/* Mockup App Content */}
-            <div className="relative z-10 p-6 pt-14 flex flex-col gap-6 h-full">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Dashboard</h3>
-                  <p className="text-xs text-zinc-500">Welcome back, User</p>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold">U</div>
-              </div>
-
-              <div className="p-5 rounded-3xl bg-zinc-800/50 border border-zinc-700/50 backdrop-blur-md">
-                <p className="text-sm text-zinc-400 mb-1">Attendance Status</p>
-                <div className="flex items-end gap-2">
-                  <h2 className="text-3xl font-bold text-white">Present</h2>
-                  <CheckCircle2 className="w-6 h-6 text-white mb-1" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-3xl bg-zinc-900 border border-zinc-800 flex flex-col gap-2">
-                  <Shield className="w-6 h-6 text-zinc-400" />
-                  <span className="text-sm font-medium text-white">Security</span>
-                </div>
-                <div className="p-4 rounded-3xl bg-zinc-900 border border-zinc-800 flex flex-col gap-2">
-                  <Zap className="w-6 h-6 text-zinc-400" />
-                  <span className="text-sm font-medium text-white">Performance</span>
-                </div>
-              </div>
-
-              <div className="mt-auto space-y-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-16 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center px-4 gap-4">
-                    <div className="w-10 h-10 rounded-full bg-zinc-800 animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-2 w-1/2 bg-zinc-800 rounded-full" />
-                      <div className="h-2 w-1/4 bg-zinc-800/50 rounded-full" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Mockup App Screenshot */}
+            <img
+              src="/demo.png"
+              alt="Aura mobile app demo"
+              className="relative z-10 h-full w-full object-cover"
+            />
           </motion.div>
           {/* Decorative blur elements behind mockup */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/5 blur-[100px] -z-10 rounded-full" />
@@ -515,6 +692,11 @@ export default function App() {
       {/* Immersive AI Sequence */}
       <section id="ai-chat" className="pt-20 pb-10 relative z-10 bg-black overflow-hidden border-t border-zinc-900 min-h-[80vh] flex items-center">
         <ImmersiveChat />
+      </section>
+
+      {/* Face Scanning Attendance View */}
+      <section id="face-attendance" className="relative z-10 overflow-hidden bg-black border-t border-zinc-900">
+        <FaceAttendanceScan />
       </section>
 
       {/* Aura AI Capabilities Section */}
@@ -534,7 +716,18 @@ export default function App() {
               <Sparkles className="w-4 h-4 text-zinc-300" />
               Meet Aura AI
             </div>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight">Your intelligent <br className="hidden md:block" />academic engine.</h2>
+            <div className="mb-6">
+              <TrueFocus
+                sentence="Your intelligent academic engine."
+                manualMode={false}
+                blurAmount={3}
+                borderColor="#c8c8cb"
+                glowColor="rgba(255, 255, 255, 0.45)"
+                animationDuration={0.7}
+                pauseBetweenAnimations={0.8}
+                disableAnimation={isPerformanceMode}
+              />
+            </div>
             <p className="text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed">Not just a chatbot. Aura AI actively analyzes complex attendance patterns, autonomously generates official reports, and has deep, secure access to your institutional data permissions.</p>
           </motion.div>
 
@@ -571,7 +764,17 @@ export default function App() {
           className="max-w-7xl mx-auto px-6"
         >
           <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight">Uncompromising Quality</h2>
+            <ScrollFloat
+              containerClassName="mb-6"
+              textClassName="text-white"
+              animationDuration={1}
+              ease="back.inOut(2)"
+              scrollStart="top bottom-=10%"
+              scrollEnd="center center+=20%"
+              stagger={0.025}
+            >
+              Uncompromising Quality
+            </ScrollFloat>
             <p className="text-xl text-zinc-400 max-w-2xl mx-auto font-light">Everything you need, wrapped in a beautiful monochrome interface designed for focus and speed.</p>
           </motion.div>
 
@@ -650,7 +853,7 @@ export default function App() {
                   <a href="#" className="text-zinc-600 hover:text-white transition-colors hover:scale-110 transform duration-300">
                     <Globe className="w-6 h-6" />
                   </a>
-                  <a href="#" className="text-zinc-600 hover:text-[#1DA1F2] transition-colors hover:scale-110 transform duration-300">
+                  <a href="#" className="text-zinc-600 hover:text-white transition-colors hover:scale-110 transform duration-300">
                     <MessageCircle className="w-6 h-6" />
                   </a>
                   <a href="#" className="text-zinc-600 hover:text-white transition-colors hover:scale-110 transform duration-300">
