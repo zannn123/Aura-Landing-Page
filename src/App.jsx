@@ -353,6 +353,304 @@ const usePerformanceMode = () => {
   return isPerformanceMode;
 };
 
+// --- iOS PWA Install Modal ---
+const IOSInstallModal = ({ isOpen, onClose }) => {
+  const smoothEase = [0.23, 1, 0.32, 1];
+  const [activeStep, setActiveStep] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const [launched, setLaunched] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) { setActiveStep(0); setLaunched(false); return; }
+    const timers = [
+      setTimeout(() => setActiveStep(1), 1200),
+      setTimeout(() => setActiveStep(2), 2600),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [isOpen]);
+
+  const steps = [
+    {
+      number: '01',
+      title: 'Open in Safari',
+      desc: 'Tap the button below. This only works in Safari — not Chrome or Firefox.',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth={1.5}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+          <path d="m16.24 7.76-4.95 2.83-2.83 4.95 4.95-2.83 2.83-4.95z" fill="currentColor" stroke="none" />
+        </svg>
+      )
+    },
+    {
+      number: '02',
+      title: 'Tap the Share Icon',
+      desc: 'At the bottom of Safari, tap the Share button — the box with an arrow pointing up.',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth={1.5}>
+          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13" />
+        </svg>
+      )
+    },
+    {
+      number: '03',
+      title: 'Add to Home Screen',
+      desc: 'Scroll the share sheet and tap "Add to Home Screen", then tap Add in the top right.',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth={1.5}>
+          <rect x="3" y="3" width="18" height="18" rx="4" />
+          <path d="M12 8v8M8 12h8" />
+        </svg>
+      )
+    }
+  ];
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('https://aura-test.coeofjrmsu.com/');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handleLaunch = () => {
+    setLaunched(true);
+    setTimeout(() => window.open('https://aura-test.coeofjrmsu.com/', '_blank'), 400);
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
+          style={{ background: 'rgba(0,0,0,0.75)' }}
+          onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
+          {/* Backdrop blur layer */}
+          <div className="absolute inset-0 backdrop-blur-2xl pointer-events-none" />
+
+          <motion.div
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+            className="relative w-full sm:max-w-md z-10"
+          >
+            {/* Outer glow ring */}
+            <div className="absolute -inset-px rounded-t-[2.5rem] sm:rounded-[2.5rem] bg-gradient-to-b from-white/10 to-white/0 pointer-events-none" />
+
+            <div className="bg-[#0a0a0a] rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden border border-white/[0.07] shadow-[0_-40px_120px_rgba(0,0,0,0.8)]">
+
+              {/* Shimmer top line */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+
+              {/* Drag pill */}
+              <div className="flex justify-center pt-3.5 pb-0 sm:hidden">
+                <motion.div
+                  animate={{ scaleX: [1, 1.15, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-9 h-1 bg-zinc-700 rounded-full"
+                />
+              </div>
+
+              <div className="px-6 pt-5 pb-7 sm:px-8 sm:pt-7 sm:pb-8">
+
+                {/* Header */}
+                <div className="flex items-center justify-between mb-7">
+                  <div className="flex items-center gap-3.5">
+                    <motion.div
+                      animate={{ rotate: [0, -8, 8, 0] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                      className="w-11 h-11 bg-white text-black rounded-[14px] flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.15)] flex-shrink-0"
+                    >
+                      <Apple className="w-5 h-5" />
+                    </motion.div>
+                    <div>
+                      <h2 className="text-[17px] font-bold text-white tracking-tight leading-tight">Install on iPhone</h2>
+                      <p className="text-zinc-500 text-xs mt-0.5">Safari required · 3 steps</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-white hover:border-zinc-600 transition-all active:scale-90"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Visual phone preview strip */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6, ease: smoothEase }}
+                  className="relative mb-6 rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 p-4"
+                >
+                  {/* Fake Safari bar */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 rounded-full bg-zinc-700" />
+                      <div className="w-2 h-2 rounded-full bg-zinc-700" />
+                      <div className="w-2 h-2 rounded-full bg-zinc-700" />
+                    </div>
+                    <div className="flex-1 bg-zinc-800 rounded-md px-3 py-1 flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full border border-zinc-600 flex-shrink-0" />
+                      <span className="text-[10px] text-zinc-500 font-mono truncate">aura-test.coeofjrmsu.com</span>
+                    </div>
+                  </div>
+                  {/* Fake page content */}
+                  <div className="space-y-1.5">
+                    <div className="h-2 bg-zinc-800 rounded-full w-3/4" />
+                    <div className="h-2 bg-zinc-800 rounded-full w-1/2" />
+                    <div className="h-2 bg-zinc-800 rounded-full w-2/3" />
+                  </div>
+                  {/* Animated active step highlight */}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeStep}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ duration: 0.3 }}
+                      className="absolute bottom-3 right-3 px-2.5 py-1 bg-white text-black text-[10px] font-bold rounded-lg"
+                    >
+                      {activeStep === 0 && '① Open Safari'}
+                      {activeStep === 1 && '② Tap Share ↑'}
+                      {activeStep === 2 && '③ Add to Home'}
+                    </motion.div>
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Steps */}
+                <div className="flex flex-col gap-2 mb-6">
+                  {steps.map((step, i) => {
+                    const isActive = activeStep === i;
+                    const isDone = activeStep > i;
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.15 + i * 0.1, duration: 0.5, ease: smoothEase }}
+                        className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl border transition-all duration-500 ${
+                          isActive
+                            ? 'bg-white/[0.06] border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.04)]'
+                            : isDone
+                            ? 'bg-zinc-900/40 border-zinc-800/40 opacity-60'
+                            : 'bg-zinc-900/30 border-zinc-800/30 opacity-40'
+                        }`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
+                          isActive ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]'
+                          : isDone ? 'bg-zinc-800 text-zinc-400'
+                          : 'bg-zinc-900 text-zinc-600'
+                        }`}>
+                          {isDone
+                            ? <CheckCircle2 className="w-5 h-5" />
+                            : step.icon
+                          }
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-black tracking-[0.18em] uppercase transition-colors duration-500 ${
+                              isActive ? 'text-zinc-400' : 'text-zinc-700'
+                            }`}>{step.number}</span>
+                            <span className={`text-sm font-semibold transition-colors duration-500 ${
+                              isActive ? 'text-white' : isDone ? 'text-zinc-500' : 'text-zinc-600'
+                            }`}>{step.title}</span>
+                          </div>
+                          <p className={`text-[11px] leading-relaxed mt-0.5 transition-colors duration-500 ${
+                            isActive ? 'text-zinc-400' : 'text-zinc-700'
+                          }`}>{step.desc}</p>
+                        </div>
+                        {isActive && (
+                          <motion.div
+                            animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                            className="w-2 h-2 rounded-full bg-white flex-shrink-0"
+                          />
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* CTA */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5, duration: 0.5, ease: smoothEase }}
+                  className="flex gap-2.5"
+                >
+                  <motion.button
+                    onClick={handleLaunch}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex-1 py-4 bg-white text-black font-bold rounded-2xl flex items-center justify-center gap-2 text-sm shadow-[0_0_40px_rgba(255,255,255,0.12)] hover:bg-zinc-100 transition-colors relative overflow-hidden"
+                  >
+                    {launched ? (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="flex items-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Opened!
+                      </motion.span>
+                    ) : (
+                      <>
+                        <Globe className="w-4 h-4" />
+                        Open in Safari
+                      </>
+                    )}
+                    <motion.div
+                      initial={{ x: '-100%' }}
+                      animate={{ x: '100%' }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: 'linear', delay: 1 }}
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none"
+                    />
+                  </motion.button>
+
+                  <motion.button
+                    onClick={handleCopy}
+                    whileTap={{ scale: 0.97 }}
+                    className="px-4 py-4 bg-zinc-900 border border-zinc-800 text-zinc-300 font-semibold rounded-2xl flex items-center justify-center gap-2 text-sm hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition-all"
+                  >
+                    <AnimatePresence mode="wait">
+                      {copied ? (
+                        <motion.span
+                          key="copied"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="flex items-center gap-1.5 text-xs whitespace-nowrap"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" /> Copied!
+                        </motion.span>
+                      ) : (
+                        <motion.span
+                          key="copy"
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="flex items-center gap-1.5 text-xs whitespace-nowrap"
+                        >
+                          <Share2 className="w-3.5 h-3.5" /> Copy Link
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                </motion.div>
+
+                <p className="text-center text-[10px] text-zinc-700 mt-4 font-medium tracking-wide">SAFARI ONLY · iOS 16.4+ REQUIRED FOR PWA</p>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 // --- Early Access Modal ---
 const EarlyAccessModal = ({ isOpen, onClose }) => {
   const [feedback, setFeedback] = useState("");
@@ -475,6 +773,7 @@ export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
+  const [showIOSInstall, setShowIOSInstall] = useState(false);
   const isPerformanceMode = usePerformanceMode();
 
   useEffect(() => {
@@ -495,6 +794,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-hidden">
       <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
+      <IOSInstallModal isOpen={showIOSInstall} onClose={() => setShowIOSInstall(false)} />
 
       {/* Background gradients for visual depth */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -633,11 +933,13 @@ export default function App() {
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </a>
             <a
-              href="/ios-setup"
+              href="https://aura-test.coeofjrmsu.com/"
+              target="_blank"
+              rel="noopener noreferrer"
               className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
             >
-              <Apple className="w-5 h-5" />
-              <span>Install iOS PWA</span>
+              <Globe className="w-5 h-5" />
+              <span>Launch PWA</span>
             </a>
           </motion.div>
 
@@ -903,14 +1205,27 @@ export default function App() {
               </div>
             </a>
 
-            <a
-              href="/ios-setup"
+            <button
+              onClick={() => setShowIOSInstall(true)}
               className="w-full sm:w-auto px-10 py-6 bg-white text-black border-[3px] border-black rounded-[2rem] font-bold text-xl hover:bg-zinc-100 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.05)] flex items-center justify-center gap-4 group"
             >
               <Apple className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <div className="text-left">
                 <div className="text-sm font-medium text-zinc-500">Install for iOS</div>
                 <div>Add PWA to Home Screen</div>
+              </div>
+            </button>
+
+            <a
+              href="https://aura-test.coeofjrmsu.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-10 py-6 bg-black text-white rounded-[2rem] font-bold text-xl hover:bg-zinc-800 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 group"
+            >
+              <Globe className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              <div className="text-left">
+                <div className="text-sm font-medium text-zinc-400">Open in Browser</div>
+                <div>Launch PWA</div>
               </div>
             </a>
           </motion.div>
