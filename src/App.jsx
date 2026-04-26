@@ -774,25 +774,47 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   const [showIOSInstall, setShowIOSInstall] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
   const isPerformanceMode = usePerformanceMode();
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 20);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-
-    // Show early access modal after 2 seconds
+    window.addEventListener('scroll', handleScroll, { passive: true });
     const timer = setTimeout(() => setShowEarlyAccess(true), 2000);
+
+    const handleBeforeInstall = (e) => { e.preventDefault(); setDeferredPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       clearTimeout(timer);
     };
   }, []);
 
+  const handleInstallPWA = () => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isIOS) {
+      setShowIOSInstall(true);
+    } else if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
+    } else {
+      window.open('https://aura-test.coeofjrmsu.com/', '_blank');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-hidden">
+    <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-x-hidden">
       <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
       <IOSInstallModal isOpen={showIOSInstall} onClose={() => setShowIOSInstall(false)} />
 
@@ -818,16 +840,8 @@ export default function App() {
         </div>
         {!isPerformanceMode && (
           <>
-            <motion.div
-              animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.1, 1] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen"
-            />
-            <motion.div
-              animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.2, 1] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen"
-            />
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen" />
           </>
         )}
       </div>
@@ -848,6 +862,7 @@ export default function App() {
               src="/logo-white.png"
               alt="Aura Logo"
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform"
+              loading="lazy"
               onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
             />
             <span className="font-bold text-xl tracking-tight">Aura</span>
@@ -932,15 +947,13 @@ export default function App() {
               <span>Download APK</span>
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </a>
-            <a
-              href="https://aura-test.coeofjrmsu.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
+            <button
+              onClick={handleInstallPWA}
+              className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all"
             >
-              <Globe className="w-5 h-5" />
-              <span>Launch PWA</span>
-            </a>
+              <Apple className="w-5 h-5" />
+              <span>Install the App</span>
+            </button>
           </motion.div>
 
           <motion.div variants={fadeInUp} className="mt-12 flex items-center justify-center lg:justify-start gap-4 text-sm text-zinc-500 font-medium">
@@ -984,6 +997,8 @@ export default function App() {
               src="/demo.png"
               alt="Aura mobile app demo"
               className="relative z-10 h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           </motion.div>
           {/* Decorative blur elements behind mockup */}
@@ -1057,7 +1072,7 @@ export default function App() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900">
+      <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900 content-visibility-auto">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1116,7 +1131,7 @@ export default function App() {
       </section>
 
       {/* Team Section */}
-      <section id="team" className="py-32 relative z-10 bg-black border-t border-zinc-900">
+      <section id="team" className="py-32 relative z-10 bg-black border-t border-zinc-900 content-visibility-auto">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1146,7 +1161,7 @@ export default function App() {
               >
                 <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-8 border-2 border-zinc-900 group-hover:border-zinc-700 transition-colors relative">
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
-                  <img src={member.img} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img src={member.img} alt={member.name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-2">{member.name}</h3>
@@ -1206,28 +1221,15 @@ export default function App() {
             </a>
 
             <button
-              onClick={() => setShowIOSInstall(true)}
+              onClick={handleInstallPWA}
               className="w-full sm:w-auto px-10 py-6 bg-white text-black border-[3px] border-black rounded-[2rem] font-bold text-xl hover:bg-zinc-100 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.05)] flex items-center justify-center gap-4 group"
             >
               <Apple className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <div className="text-left">
-                <div className="text-sm font-medium text-zinc-500">Install for iOS</div>
-                <div>Add PWA to Home Screen</div>
+                <div className="text-sm font-medium text-zinc-500">One-tap install</div>
+                <div>Install the App</div>
               </div>
             </button>
-
-            <a
-              href="https://aura-test.coeofjrmsu.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-10 py-6 bg-black text-white rounded-[2rem] font-bold text-xl hover:bg-zinc-800 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 group"
-            >
-              <Globe className="w-8 h-8 group-hover:scale-110 transition-transform" />
-              <div className="text-left">
-                <div className="text-sm font-medium text-zinc-400">Open in Browser</div>
-                <div>Launch PWA</div>
-              </div>
-            </a>
           </motion.div>
           <motion.p variants={fadeInUp} className="mt-12 text-base text-zinc-500 font-medium tracking-wide uppercase">Version 1.3.0 • Free to use</motion.p>
         </motion.div>

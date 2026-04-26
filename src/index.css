@@ -3,9 +3,37 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-black text-white antialiased selection:bg-white selection:text-black;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+    text-rendering: optimizeSpeed;
   }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* GPU-accelerate all framer-motion animated elements */
+[data-framer-component-type],
+.motion-safe\:transform {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Promote fixed/sticky elements to their own layer */
+nav, .fixed {
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
 }
 
 .glass-panel {
