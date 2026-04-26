@@ -330,24 +330,15 @@ const scaleUp = {
 const usePerformanceMode = () => {
   const [isPerformanceMode, setIsPerformanceMode] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
   useEffect(() => {
-    const coarsePointer = window.matchMedia('(pointer: coarse)');
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const updatePerformanceMode = () => {
-      setIsPerformanceMode(coarsePointer.matches || reducedMotion.matches);
-    };
-
-    updatePerformanceMode();
-    coarsePointer.addEventListener('change', updatePerformanceMode);
-    reducedMotion.addEventListener('change', updatePerformanceMode);
-
-    return () => {
-      coarsePointer.removeEventListener('change', updatePerformanceMode);
-      reducedMotion.removeEventListener('change', updatePerformanceMode);
-    };
+    const update = () => setIsPerformanceMode(reducedMotion.matches);
+    update();
+    reducedMotion.addEventListener('change', update);
+    return () => reducedMotion.removeEventListener('change', update);
   }, []);
 
   return isPerformanceMode;
@@ -1072,7 +1063,7 @@ export default function App() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900 content-visibility-auto">
+      <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900">
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -1131,7 +1122,7 @@ export default function App() {
       </section>
 
       {/* Team Section */}
-      <section id="team" className="py-32 relative z-10 bg-black border-t border-zinc-900 content-visibility-auto">
+      <section id="team" className="py-32 relative z-10 bg-black border-t border-zinc-900">
         <motion.div
           initial="hidden"
           whileInView="visible"
