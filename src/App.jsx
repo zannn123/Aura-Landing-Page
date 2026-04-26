@@ -829,9 +829,9 @@ export default function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { name: 'Lance D Celicious', role: 'Iterator Manager', img: 'lance.jpg' },
+              { name: 'Lance D Celicious', role: 'Tech Lead', img: 'lance.jpg' },
               { name: 'Meeko Pauleonard Tan', role: 'Project Manager', img: 'tan.jpg' },
-              { name: 'Gloryzann H Aclao', role: 'Frontend', img: 'zann.jpg' },
+              { name: 'Gloryzann H Aclao', role: 'Frontend Developer x Backburner x Second Option', img: 'zann.jpg' },
               { name: 'Frienzal Labisig', role: 'Backend Developer', img: 'zal.jpg' },
               { name: 'Carlsam M. Puliran Jr.', role: 'Ai Integration Developer', img: 'cmp.png' },
               { name: 'Gabriel Ryan Duterte', role: 'Documentation and Testing', img: 'gab.jpg' },
