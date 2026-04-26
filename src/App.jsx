@@ -793,15 +793,7 @@ export default function App() {
   }, []);
 
   const handleInstallPWA = () => {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (isIOS) {
-      setShowIOSInstall(true);
-    } else if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(() => setDeferredPrompt(null));
-    } else {
-      window.open('https://aura-test.coeofjrmsu.com/', '_blank');
-    }
+    setShowIOSInstall(true);
   };
 
   return (
@@ -943,7 +935,7 @@ export default function App() {
               className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all"
             >
               <Apple className="w-5 h-5" />
-              <span>Install the App</span>
+              <span>For iOS</span>
             </button>
           </motion.div>
 
@@ -1217,8 +1209,8 @@ export default function App() {
             >
               <Apple className="w-8 h-8 group-hover:scale-110 transition-transform" />
               <div className="text-left">
-                <div className="text-sm font-medium text-zinc-500">One-tap install</div>
-                <div>Install the App</div>
+                <div className="text-sm font-medium text-zinc-500">For iOS</div>
+                <div>Install Instructions</div>
               </div>
             </button>
           </motion.div>
