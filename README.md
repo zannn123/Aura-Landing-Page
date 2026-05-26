@@ -1,16 +1,34 @@
-# React + Vite
+# Aura Landing Page
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Public marketing/landing website for Aura. The app is built with React + Vite
+and is served in production by nginx.
 
-Currently, two official plugins are available:
+## Local Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm install
+npm run dev
+```
 
-## React Compiler
+## Docker
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Build and run the standalone landing page container:
 
-## Expanding the ESLint configuration
+```sh
+docker compose up --build -d
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Default host URL:
+
+```txt
+http://localhost:3000
+```
+
+Override the published host port if needed:
+
+```sh
+LANDING_PORT=8080 docker compose up --build -d
+```
+
+The container serves the built Vite app on internal port `80` and exposes a
+health endpoint at `/healthz`.
