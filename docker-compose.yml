@@ -6,7 +6,7 @@ services:
     container_name: aura-landing
     restart: unless-stopped
     ports:
-      - "${LANDING_PORT:-3000}:80"
+      - "${LANDING_PORT:-7001}:80"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/healthz >/dev/null 2>&1 || exit 1"]
       interval: 15s

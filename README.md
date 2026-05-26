@@ -21,13 +21,13 @@ docker compose up --build -d
 Default host URL:
 
 ```txt
-http://localhost:3000
+http://localhost:7001
 ```
 
 Override the published host port if needed:
 
 ```sh
-LANDING_PORT=8080 docker compose up --build -d
+LANDING_PORT=3000 docker compose up --build -d
 ```
 
 The container serves the built Vite app on internal port `80` and exposes a
