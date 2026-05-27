@@ -926,7 +926,7 @@ export default function App() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-black/80 backdrop-blur-md border-b border-zinc-800 py-4' : 'bg-transparent py-6'
           }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <motion.a
             href="/"
             onClick={goToHome}
@@ -945,11 +945,28 @@ export default function App() {
             <span className="font-bold text-xl tracking-tight">Aura</span>
           </motion.a>
 
+          {/* Center: version badge (desktop only) */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="hidden md:inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-zinc-300 justify-self-center"
+          >
+            <motion.span
+              animate={{ opacity: [0.2, 1, 0.2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-2 h-2 rounded-full bg-white"
+            />
+            Aura v{auraVersion.version} is now live
+          </motion.div>
+          {/* Placeholder for mobile so the grid center column stays empty */}
+          <div className="md:hidden" aria-hidden />
+
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="hidden md:flex items-center gap-8"
+            className="hidden md:flex items-center gap-8 justify-self-end"
           >
             <a href="#features" onClick={goToSection('features')} className={`text-sm font-medium transition-colors ${view === 'home' ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-white'}`}>Features</a>
             <a href="#help" onClick={goToHelp} className={`text-sm font-medium transition-colors ${view === 'help' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>Help</a>
@@ -961,7 +978,7 @@ export default function App() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-zinc-300 relative z-50"
+            className="md:hidden text-zinc-300 relative z-50 justify-self-end"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X /> : <Menu />}
@@ -998,9 +1015,10 @@ export default function App() {
               animate="visible"
               className="flex flex-col items-center px-4"
             >
+              {/* Badge moved into the nav (centered). On mobile, show it here. */}
               <motion.div
                 variants={fadeInUp}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm text-xs font-medium text-zinc-300 mb-8"
+                className="inline-flex md:hidden items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm text-xs font-medium text-zinc-300 mb-6"
               >
                 <motion.span
                   animate={{ opacity: [0.2, 1, 0.2] }}
@@ -1053,28 +1071,6 @@ export default function App() {
                 </button>
               </motion.div>
 
-              <motion.div
-                variants={fadeInUp}
-                className="mt-10 flex items-center justify-center gap-4 text-sm text-zinc-500 font-medium"
-              >
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="w-9 h-9 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center overflow-hidden shadow-lg">
-                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" loading="lazy" />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-col items-start gap-0.5">
-                  <div className="flex items-center gap-0.5">
-                    <Star className="w-3.5 h-3.5 fill-white text-white" />
-                    <Star className="w-3.5 h-3.5 fill-white text-white" />
-                    <Star className="w-3.5 h-3.5 fill-white text-white" />
-                    <Star className="w-3.5 h-3.5 fill-white text-white" />
-                    <Star className="w-3.5 h-3.5 fill-white text-white" />
-                  </div>
-                  <span className="text-xs">Trusted by 10k+ users</span>
-                </div>
-              </motion.div>
             </motion.div>
           }
         >
