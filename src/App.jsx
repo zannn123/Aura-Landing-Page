@@ -802,10 +802,6 @@ export default function App() {
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    const timer = setTimeout(() => {
-      if (typeof window !== 'undefined' && window.location.hash === '#help') return;
-      setShowEarlyAccess(true);
-    }, 2000);
 
     const handleBeforeInstall = (e) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
@@ -823,7 +819,6 @@ export default function App() {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
       window.removeEventListener('hashchange', handleHashChange);
-      clearTimeout(timer);
     };
   }, []);
 
@@ -881,6 +876,29 @@ export default function App() {
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-x-hidden">
       <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
       <IosComingSoonModal open={showIOSInstall} onClose={() => setShowIOSInstall(false)} />
+
+      {/* Floating feedback button — dedicated entry point (no more auto-popup) */}
+      {!showEarlyAccess && !showIOSInstall && !mobileMenuOpen && (
+        <motion.button
+          initial={{ opacity: 0, y: 16, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.55, delay: 0.7, ease: [0.23, 1, 0.32, 1] }}
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => setShowEarlyAccess(true)}
+          aria-label="Send feedback"
+          className="group fixed bottom-5 right-5 z-30 flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-zinc-950/85 px-4 py-3 text-sm font-semibold text-zinc-200 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] transition-colors hover:border-white/20 hover:text-white md:bottom-6 md:right-6"
+        >
+          <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:rotate-6">
+            <MessageCircle className="h-3.5 w-3.5" strokeWidth={2.2} />
+            <span className="absolute -right-0.5 -top-0.5 flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
+          </span>
+          <span className="pr-1">Feedback</span>
+        </motion.button>
+      )}
 
       {/* Background gradients for visual depth — home view only (perf + help-center readability) */}
       {view === 'home' && (
