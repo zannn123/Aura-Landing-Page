@@ -1,0 +1,40 @@
+{
+  "history": [
+    {
+      "version": "1.33.2",
+      "buildNumber": "75",
+      "releasedAt": "2026-05-24",
+      "note": "Pilot stable. Assistant Fast/Think mode, inline chart rendering, deployment hardening."
+    },
+    {
+      "version": "1.33.0",
+      "buildNumber": "73",
+      "releasedAt": "2026-05-15",
+      "note": "Assistant chat screen and SSE client for the Flutter app."
+    },
+    {
+      "version": "1.32.0",
+      "buildNumber": "70",
+      "releasedAt": "2026-04-28",
+      "note": "Bulk student import refresh, role assignment edge-cases."
+    },
+    {
+      "version": "1.30.0",
+      "buildNumber": "62",
+      "releasedAt": "2026-03-30",
+      "note": "Geofence accuracy improvements, sign-out grace windows."
+    },
+    {
+      "version": "1.25.0",
+      "buildNumber": "55",
+      "releasedAt": "2026-02-12",
+      "note": "Face re-enrollment flow, manual attendance audit trail."
+    },
+    {
+      "version": "1.22.1",
+      "buildNumber": "48",
+      "releasedAt": "2026-01-09",
+      "note": "First pilot-merge build with governance workspace."
+    }
+  ]
+}

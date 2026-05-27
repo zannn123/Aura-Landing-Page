@@ -1,0 +1,58 @@
+name: Sync APK Version
+
+# Runs whenever Aura.apk changes (or you trigger it manually).
+# Extracts versionName + versionCode from the APK via `aapt`,
+# writes them into package.json + public/version.json, and
+# commits the change back to the branch that triggered the run.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "public/Aura.apk"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Needed so we can push the version-bump commit back
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install aapt
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends aapt
+
+      - name: Run sync-version
+        run: node scripts/sync-version.mjs
+
+      - name: Commit version bump (if any)
+        run: |
+          git config user.name "aura-version-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add package.json public/version.json
+          if git diff --staged --quiet; then
+            echo "No version change to commit."
+          else
+            VERSION=$(node -p "require('./package.json').auraAppVersion")
+            BUILD=$(node -p "require('./package.json').auraAppBuildNumber || ''")
+            if [ -n "$BUILD" ]; then
+              MSG="chore: sync APK version to v${VERSION}+${BUILD}"
+            else
+              MSG="chore: sync APK version to v${VERSION}"
+            fi
+            git commit -m "$MSG"
+            git push
+          fi

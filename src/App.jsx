@@ -5,8 +5,15 @@ import Loader from './Loader';
 import TextPressure from './TextPressure';
 import TrueFocus from './TrueFocus';
 import ScrollFloat from './ScrollFloat';
+import { ContainerScroll } from './ContainerScrollAnimation';
+import FeaturesBento from './FeaturesBento';
+import HelpCenter from './HelpCenter';
+import CinematicFooter from './CinematicFooter';
+import Versions from './Versions';
+import IosComingSoonModal from './IosComingSoonModal';
+import useAuraVersion from './useAuraVersion';
 
-const Beams = React.lazy(() => import('./Beams'));
+const ShaderAnimation = React.lazy(() => import('./ShaderAnimation'));
 
 // --- Immersive Chat Simulation ---
 const ImmersiveChat = () => {
@@ -766,7 +773,22 @@ export default function App() {
   const [showEarlyAccess, setShowEarlyAccess] = useState(false);
   const [showIOSInstall, setShowIOSInstall] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const parseHelpHash = () => {
+    if (typeof window === 'undefined') return { view: 'home', categoryId: null, articleId: null };
+    const h = window.location.hash || '';
+    if (!h.startsWith('#help')) return { view: 'home', categoryId: null, articleId: null };
+    const rest = h.slice('#help'.length).replace(/^\//, '');
+    if (!rest) return { view: 'help', categoryId: null, articleId: null };
+    const [categoryId, articleId] = rest.split('/');
+    return { view: 'help', categoryId: categoryId || null, articleId: articleId || null };
+  };
+
+  const initialHelp = parseHelpHash();
+  const [view, setView] = useState(initialHelp.view);
+  const [helpCategoryId, setHelpCategoryId] = useState(initialHelp.categoryId);
+  const [helpArticleId, setHelpArticleId] = useState(initialHelp.articleId);
   const isPerformanceMode = usePerformanceMode();
+  const auraVersion = useAuraVersion();
 
   useEffect(() => {
     let ticking = false;
@@ -780,14 +802,27 @@ export default function App() {
       }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    const timer = setTimeout(() => setShowEarlyAccess(true), 2000);
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.location.hash === '#help') return;
+      setShowEarlyAccess(true);
+    }, 2000);
 
     const handleBeforeInstall = (e) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
+    const handleHashChange = () => {
+      const parsed = parseHelpHash();
+      setView(parsed.view);
+      setHelpCategoryId(parsed.categoryId);
+      setHelpArticleId(parsed.articleId);
+      if (parsed.view === 'help') window.scrollTo({ top: 0, behavior: 'instant' });
+    };
+    window.addEventListener('hashchange', handleHashChange);
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('hashchange', handleHashChange);
       clearTimeout(timer);
     };
   }, []);
@@ -796,38 +831,77 @@ export default function App() {
     setShowIOSInstall(true);
   };
 
+  const goToHelp = (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    setView('help');
+    window.history.pushState(null, '', '#help');
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const goToHome = (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    setView('home');
+    window.history.pushState(null, '', window.location.pathname);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+
+  const goToSection = (sectionId) => (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    if (view !== 'home') {
+      setView('home');
+      window.history.pushState(null, '', window.location.pathname);
+      requestAnimationFrame(() => {
+        const el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      });
+    } else {
+      const el = document.getElementById(sectionId);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const goToBottom = (e) => {
+    if (e) e.preventDefault();
+    setMobileMenuOpen(false);
+    if (view !== 'home') {
+      setView('home');
+      window.history.pushState(null, '', window.location.pathname);
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      });
+    } else {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black overflow-x-hidden">
       <EarlyAccessModal isOpen={showEarlyAccess} onClose={() => setShowEarlyAccess(false)} />
-      <IOSInstallModal isOpen={showIOSInstall} onClose={() => setShowIOSInstall(false)} />
+      <IosComingSoonModal open={showIOSInstall} onClose={() => setShowIOSInstall(false)} />
 
-      {/* Background gradients for visual depth */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 z-0">
-          {!isPerformanceMode ? (
-            <React.Suspense fallback={null}>
-              <Beams
-                beamWidth={2}
-                beamHeight={15}
-                beamNumber={12}
-                lightColor="#ffffff"
-                speed={2}
-                noiseIntensity={1.75}
-                scale={0.2}
-                rotation={49}
-              />
-            </React.Suspense>
-          ) : (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_42%)]" />
+      {/* Background gradients for visual depth — home view only (perf + help-center readability) */}
+      {view === 'home' && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 z-0">
+            {!isPerformanceMode ? (
+              <React.Suspense fallback={null}>
+                <ShaderAnimation />
+              </React.Suspense>
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.12),transparent_42%)]" />
+            )}
+          </div>
+          {!isPerformanceMode && (
+            <>
+              <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen" />
+              <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen" />
+            </>
           )}
         </div>
-        {!isPerformanceMode && (
-          <>
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-800/20 blur-[120px] rounded-full mix-blend-screen" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-700/10 blur-[100px] rounded-full mix-blend-screen" />
-          </>
-        )}
-      </div>
+      )}
 
       {/* Navigation */}
       <nav
@@ -835,7 +909,9 @@ export default function App() {
           }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-          <motion.div
+          <motion.a
+            href="/"
+            onClick={goToHome}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
@@ -849,7 +925,7 @@ export default function App() {
               onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
             />
             <span className="font-bold text-xl tracking-tight">Aura</span>
-          </motion.div>
+          </motion.a>
 
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -857,10 +933,10 @@ export default function App() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="hidden md:flex items-center gap-8"
           >
-            <a href="#features" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Features</a>
-            <a href="#team" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Team</a>
-            <a href="#reviews" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Reviews</a>
-            <a href="#download" className="px-5 py-2.5 bg-white text-black text-sm font-semibold rounded-full hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)]">
+            <a href="#features" onClick={goToSection('features')} className={`text-sm font-medium transition-colors ${view === 'home' ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-white'}`}>Features</a>
+            <a href="#help" onClick={goToHelp} className={`text-sm font-medium transition-colors ${view === 'help' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>Help</a>
+            <a href="#team" onClick={goToSection('team')} className={`text-sm font-medium transition-colors ${view === 'home' ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-white'}`}>Team</a>
+            <a href="#download" onClick={goToBottom} className="px-5 py-2.5 bg-white text-black text-sm font-semibold rounded-full hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.3)]">
               Get Started
             </a>
           </motion.div>
@@ -883,110 +959,116 @@ export default function App() {
           exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
           className="fixed inset-0 z-40 bg-black/95 flex flex-col items-center justify-center gap-8 md:hidden"
         >
-          <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Features</a>
-          <a href="#team" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Team</a>
-          <a href="#reviews" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Reviews</a>
-          <a href="#download" onClick={() => setMobileMenuOpen(false)} className="px-8 py-4 bg-white text-black text-lg font-semibold rounded-full mt-4">
+          <a href="#features" onClick={goToSection('features')} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Features</a>
+          <a href="#help" onClick={goToHelp} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Help</a>
+          <a href="#team" onClick={goToSection('team')} className="text-2xl font-medium text-zinc-300 hover:text-white transition-colors">Team</a>
+          <a href="#download" onClick={goToBottom} className="px-8 py-4 bg-white text-black text-lg font-semibold rounded-full mt-4">
             Get the App
           </a>
         </motion.div>
       )}
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 min-h-[90vh]">
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="flex-1 text-center lg:text-left"
-        >
-          <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm text-xs font-medium text-zinc-300 mb-8">
-            <motion.span
-              animate={{ opacity: [0.2, 1, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-2 h-2 rounded-full bg-white"
-            />
-            Aura v1.3 is now live
-          </motion.div>
-
-          <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-tight mb-6">
-            Elegance in every <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
-              interaction.
-            </span>
-          </motion.h1>
-
-          <motion.p variants={fadeInUp} className="text-lg md:text-2xl text-zinc-400 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light">
-            Experience the pinnacle of digital attendance and academic management. Aura brings a minimalist, hyper-fast, and secure platform right to your fingertips.
-          </motion.p>
-
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-            <a
-              href="/app-release.apk"
-              download
-              className="group relative flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white text-black rounded-2xl font-semibold hover:bg-zinc-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] overflow-hidden"
+      {view === 'home' && (
+      <>
+      {/* Hero Section — Scroll-driven dashboard reveal */}
+      <section className="relative z-10 overflow-hidden">
+        <ContainerScroll
+          titleComponent={
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col items-center px-4"
             >
-              <Smartphone className="w-5 h-5" />
-              <span>Download APK</span>
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            </a>
-            <button
-              onClick={handleInstallPWA}
-              className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all"
-            >
-              <Apple className="w-5 h-5" />
-              <span>For iOS</span>
-            </button>
-          </motion.div>
+              <motion.div
+                variants={fadeInUp}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm text-xs font-medium text-zinc-300 mb-8"
+              >
+                <motion.span
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-white"
+                />
+                Aura v{auraVersion.version} is now live
+              </motion.div>
 
-          <motion.div variants={fadeInUp} className="mt-12 flex items-center justify-center lg:justify-start gap-4 text-sm text-zinc-500 font-medium">
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className={`w-10 h-10 rounded-full border-2 border-black bg-zinc-${i * 2}00 flex items-center justify-center overflow-hidden shadow-lg`}>
-                  <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
+              <motion.h1
+                variants={fadeInUp}
+                className="text-3xl md:text-5xl font-semibold text-zinc-200 tracking-tight leading-tight"
+              >
+                Built to make
+              </motion.h1>
+
+              <motion.h2
+                variants={fadeInUp}
+                className="text-6xl md:text-[7rem] lg:text-[8rem] font-black mt-1 leading-[0.95] tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500"
+              >
+                Campus Life Easier.
+              </motion.h2>
+
+              <motion.p
+                variants={fadeInUp}
+                className="text-base md:text-xl text-zinc-400 mt-6 max-w-2xl mx-auto font-light leading-relaxed"
+              >
+                One centralized platform. Zero manual entry. Built for the way campuses actually run — from scattered paper rosters to clarity in one tap.
+              </motion.p>
+
+              <motion.div
+                variants={fadeInUp}
+                className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10"
+              >
+                <a
+                  href="/Aura.apk"
+                  download
+                  className="group relative flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white text-black rounded-2xl font-semibold hover:bg-zinc-100 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] overflow-hidden"
+                >
+                  <Smartphone className="w-5 h-5" />
+                  <span>Download APK</span>
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                </a>
+                <button
+                  onClick={handleInstallPWA}
+                  className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-md text-white border border-white/10 rounded-2xl font-semibold hover:bg-white/10 hover:border-white/20 transition-all"
+                >
+                  <Apple className="w-5 h-5" />
+                  <span>For iOS</span>
+                </button>
+              </motion.div>
+
+              <motion.div
+                variants={fadeInUp}
+                className="mt-10 flex items-center justify-center gap-4 text-sm text-zinc-500 font-medium"
+              >
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className="w-9 h-9 rounded-full border-2 border-black bg-zinc-800 flex items-center justify-center overflow-hidden shadow-lg">
+                      <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" loading="lazy" />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="flex flex-col items-start gap-1">
-              <div className="flex items-center gap-1">
-                <Star className="w-4 h-4 fill-white text-white" />
-                <Star className="w-4 h-4 fill-white text-white" />
-                <Star className="w-4 h-4 fill-white text-white" />
-                <Star className="w-4 h-4 fill-white text-white" />
-                <Star className="w-4 h-4 fill-white text-white" />
-              </div>
-              <span>Trusted by 10k+ users</span>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Hero Mockup */}
-        <motion.div
-          initial={{ opacity: 0, y: 100, rotate: 5 }}
-          animate={{ opacity: 1, y: 0, rotate: 0 }}
-          transition={{ duration: 1, type: "spring", bounce: 0.4 }}
-          className="flex-1 relative w-full max-w-lg lg:max-w-none"
+                <div className="flex flex-col items-start gap-0.5">
+                  <div className="flex items-center gap-0.5">
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                    <Star className="w-3.5 h-3.5 fill-white text-white" />
+                  </div>
+                  <span className="text-xs">Trusted by 10k+ users</span>
+                </div>
+              </motion.div>
+            </motion.div>
+          }
         >
-          <motion.div
-            animate={{ y: [0, -15, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative mx-auto w-[320px] h-[650px] bg-black border-[8px] border-zinc-800 rounded-[3.5rem] shadow-[0_0_50px_rgba(255,255,255,0.05)] overflow-hidden"
-          >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-zinc-800 rounded-b-xl z-20" />
-            <div className="absolute inset-0 bg-black z-0" />
-
-            {/* Mockup App Screenshot */}
-            <img
-              src="/demo.png"
-              alt="Aura mobile app demo"
-              className="relative z-10 h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          </motion.div>
-          {/* Decorative blur elements behind mockup */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/5 blur-[100px] -z-10 rounded-full" />
-        </motion.div>
+          <img
+            src="/aura-dashboard-light-tablet.png"
+            alt="Aura Dashboard"
+            className="mx-auto rounded-xl object-cover h-full w-full object-left-top"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+          />
+        </ContainerScroll>
       </section>
 
       {/* Immersive AI Sequence */}
@@ -994,124 +1076,8 @@ export default function App() {
         <ImmersiveChat />
       </section>
 
-      {/* Face Scanning Attendance View */}
-      <section id="face-attendance" className="relative z-10 overflow-hidden bg-black border-t border-zinc-900">
-        <FaceAttendanceScan />
-      </section>
-
-      {/* Aura AI Capabilities Section */}
-      <section id="ai-features" className="py-24 relative z-10 bg-black overflow-hidden">
-        {/* Dynamic Glow Background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] max-w-[1000px] bg-zinc-800/20 blur-[150px] rounded-full pointer-events-none" />
-
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-          className="max-w-7xl mx-auto px-6 relative z-10"
-        >
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zinc-700 bg-black/50 backdrop-blur-md text-sm font-medium text-white mb-6 shadow-[0_0_30px_rgba(255,255,255,0.05)]">
-              <Sparkles className="w-4 h-4 text-zinc-300" />
-              Meet Aura AI
-            </div>
-            <div className="mb-6">
-              <TrueFocus
-                sentence="Your intelligent academic engine."
-                manualMode={false}
-                blurAmount={3}
-                borderColor="#c8c8cb"
-                glowColor="rgba(255, 255, 255, 0.45)"
-                animationDuration={0.7}
-                pauseBetweenAnimations={0.8}
-                disableAnimation={isPerformanceMode}
-              />
-            </div>
-            <p className="text-xl text-zinc-400 max-w-3xl mx-auto font-light leading-relaxed">Not just a chatbot. Aura AI actively analyzes complex attendance patterns, autonomously generates official reports, and has deep, secure access to your institutional data permissions.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* AI Capabilities Cards */}
-            <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
-              <div className="absolute inset-0 bg-gradient-to-bl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <div className="relative z-10">
-                <FileText className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
-                <h3 className="text-2xl font-bold text-white mb-4">Deep Data Analysis</h3>
-                <p className="text-zinc-400 font-light text-base leading-relaxed">Aura actively monitors trends, identifies chronic absences, and structures massive datasets into clear, actionable reporting.</p>
-              </div>
-            </motion.div>
-
-            <motion.div variants={fadeInUp} className="flex-1 rounded-[3rem] bg-zinc-950 border border-zinc-800 p-8 md:p-10 relative overflow-hidden group flex flex-col justify-center">
-              <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-              <div className="relative z-10">
-                <Shield className="w-10 h-10 text-white mb-6 group-hover:scale-110 transition-transform duration-500" />
-                <h3 className="text-2xl font-bold text-white mb-4">System-Level Autonomy</h3>
-                <p className="text-zinc-400 font-light text-base leading-relaxed">It doesn't just read data. With verified clearance, the AI can execute commands, create official records, and modify system state.</p>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-32 relative z-10 bg-zinc-950 border-t border-zinc-900">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-          className="max-w-7xl mx-auto px-6"
-        >
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <ScrollFloat
-              containerClassName="mb-6"
-              textClassName="text-white"
-              animationDuration={1}
-              ease="back.inOut(2)"
-              scrollStart="top bottom-=10%"
-              scrollEnd="center center+=20%"
-              stagger={0.025}
-            >
-              Uncompromising Quality
-            </ScrollFloat>
-            <p className="text-xl text-zinc-400 max-w-2xl mx-auto font-light">Everything you need, wrapped in a beautiful monochrome interface designed for focus and speed.</p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: <Zap className="w-8 h-8" />,
-                title: 'Lightning Fast',
-                desc: 'Optimized architecture ensures that Aura loads instantly and transitions smoothly without any lag.'
-              },
-              {
-                icon: <Shield className="w-8 h-8" />,
-                title: 'Enterprise Security',
-                desc: 'Your data is encrypted and protected with industry-leading security protocols.'
-              },
-              {
-                icon: <Lock className="w-8 h-8" />,
-                title: 'Privacy First',
-                desc: 'We believe your data belongs to you. No hidden tracking, no intrusive analytics.'
-              }
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                variants={scaleUp}
-                className="h-full p-10 rounded-[2.5rem] bg-black border border-zinc-800 hover:border-zinc-600 transition-colors group relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-16 h-16 bg-white text-black rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                  {feature.icon}
-                </div>
-                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-zinc-400 leading-relaxed text-lg font-light">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
+      {/* Features Section — Scroll-immersive bento */}
+      <FeaturesBento />
 
       {/* Team Section */}
       <section id="team" className="py-32 relative z-10 bg-black border-t border-zinc-900">
@@ -1166,78 +1132,21 @@ export default function App() {
         </motion.div>
       </section>
 
-      {/* Download Section */}
-      <section id="download" className="py-40 relative z-10 overflow-hidden bg-white text-black">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(black 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-        </div>
+      {/* Version history — auto-updated when new APK ships */}
+      <Versions />
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-          className="max-w-5xl mx-auto px-6 relative z-10 text-center"
-        >
-          <motion.div variants={fadeInUp}>
-            <img
-              src="/logo-black.png"
-              alt="Aura Logo"
-              className="w-20 h-20 mx-auto mb-10 object-contain"
-              onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
-            />
-            <h2 className="text-5xl md:text-7xl font-black text-black mb-8 tracking-tighter">Ready to elevate your workflow?</h2>
-            <p className="text-2xl text-zinc-600 mb-16 max-w-3xl mx-auto font-light">Join thousands of users who have already upgraded to Aura. Available now for your mobile devices.</p>
-          </motion.div>
+      {/* Cinematic Footer — curtain-reveal CTA + branded footer */}
+      <CinematicFooter />
+      </>
+      )}
 
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <a
-              href="/app-release.apk"
-              download
-              className="w-full sm:w-auto px-10 py-6 bg-black text-white rounded-[2rem] font-bold text-xl hover:bg-zinc-800 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.2)] flex items-center justify-center gap-4 group"
-            >
-              <Smartphone className="w-8 h-8 group-hover:scale-110 transition-transform" />
-              <div className="text-left">
-                <div className="text-sm font-medium text-zinc-400">Download for Android</div>
-                <div>Get the APK</div>
-              </div>
-            </a>
-
-            <button
-              onClick={handleInstallPWA}
-              className="w-full sm:w-auto px-10 py-6 bg-white text-black border-[3px] border-black rounded-[2rem] font-bold text-xl hover:bg-zinc-100 hover:-translate-y-2 transition-all shadow-[0_20px_40px_rgba(0,0,0,0.05)] flex items-center justify-center gap-4 group"
-            >
-              <Apple className="w-8 h-8 group-hover:scale-110 transition-transform" />
-              <div className="text-left">
-                <div className="text-sm font-medium text-zinc-500">For iOS</div>
-                <div>Install Instructions</div>
-              </div>
-            </button>
-          </motion.div>
-          <motion.p variants={fadeInUp} className="mt-12 text-base text-zinc-500 font-medium tracking-wide uppercase">Version 1.3.0 • Free to use</motion.p>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-black py-12 border-t border-zinc-900 relative z-10 text-zinc-500">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 hover:text-white transition-colors cursor-pointer">
-            <img
-              src="/logo-white.png"
-              alt="Aura Logo"
-              className="w-6 h-6 object-contain"
-              onError={(e) => { e.target.onerror = null; e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"; }}
-            />
-            <span className="font-bold text-zinc-300">Aura</span>
-          </div>
-          <p className="text-sm font-light">© {new Date().getFullYear()} Aura Platform. All rights reserved.</p>
-          <div className="flex gap-8 text-sm font-medium">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Support</a>
-          </div>
-        </div>
-      </footer>
+      {view === 'help' && (
+        <HelpCenter
+          goToHome={goToHome}
+          initialCategoryId={helpCategoryId}
+          initialArticleId={helpArticleId}
+        />
+      )}
     </div>
   );
 }

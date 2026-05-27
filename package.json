@@ -2,8 +2,13 @@
   "name": "aura-landing-page",
   "private": true,
   "version": "0.0.0",
+  "auraAppVersion": "1.33.2",
+  "auraAppBuildNumber": "75",
   "type": "module",
   "scripts": {
+    "sync-version": "node scripts/sync-version.mjs",
+    "predev": "node scripts/sync-version.mjs",
+    "prebuild": "node scripts/sync-version.mjs",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
