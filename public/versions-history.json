@@ -1,6 +1,20 @@
 {
   "history": [
     {
+      "version": "1.36.2",
+      "buildNumber": "4082",
+      "releasedAt": "2026-05-28",
+      "note": "Officer-side attendance tools — manual marking, inline row actions, and a live-updating searchable roster.",
+      "highlights": [
+        "Officers with manage_attendance can now mark students present without a face scan — FAB \"Add attendance\" plus a searchable picker that hits POST /api/attendance/manual with full governance context.",
+        "Inline per-row \"Mark present\" and \"Sign out\" actions directly on the event monitor.",
+        "Searchable roster with name, mono student ID, time-in / time-out pills, status-tinted avatar, and status chip — replaces the old \"Student #142\" rows.",
+        "Filter pills — All · Present · Late · Absent — with mono count badges.",
+        "Smart-poll on attendees so check-ins appear without a manual refresh.",
+        "Backend wiring fix: GovUserSummary.studentProfileId is now the FK that actually matches attendances.student_id, so officer dashboards line up with the underlying records."
+      ]
+    },
+    {
       "version": "1.36.1",
       "buildNumber": "4081",
       "releasedAt": "2026-05-28",
