@@ -1,6 +1,21 @@
 {
   "history": [
     {
+      "version": "1.36.1",
+      "buildNumber": "2081",
+      "releasedAt": "2026-05-28",
+      "note": "Sharper attendance UX and a quieter, more reliable notification path.",
+      "highlights": [
+        "Alarm-style event notifications — rings on the alarm volume stream, bypasses silent and Focus modes.",
+        "Clearer CHECK IN / SIGN OUT banner above the scan capture button; duplicate check-ins are blocked.",
+        "Labeled CHECK-IN TIME / CHECK-OUT TIME rows in the result sheet, with a SIGN-OUT OPENS hint and a total-time pill.",
+        "Real-time auto-refresh on profile, notifications, events, sanctions, and students (30–60s while foregrounded; pauses in background).",
+        "Schoolit Users search plus Program / Year / Status / Face-enrolled filter chips.",
+        "Login redesign — centered hero, halo, staggered entrance.",
+        "Release APKs build cleanly again; per-ABI splits land at ~38–45 MB each instead of one ~105 MB fat APK."
+      ]
+    },
+    {
       "version": "1.36.0",
       "buildNumber": "2080",
       "releasedAt": "2026-05-28",

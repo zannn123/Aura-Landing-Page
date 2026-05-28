@@ -65,6 +65,16 @@ const Row = ({ entry, index, isLatest }) => {
             {entry.note}
           </p>
         )}
+        {Array.isArray(entry.highlights) && entry.highlights.length > 0 && (
+          <ul className="mt-3 grid max-w-2xl gap-1.5 text-[13.5px] font-light leading-relaxed text-zinc-400 md:text-[14.5px]">
+            {entry.highlights.map((h, i) => (
+              <li key={i} className="flex gap-3">
+                <span aria-hidden="true" className="mt-[0.55em] h-[3px] w-[3px] shrink-0 rounded-full bg-zinc-600" />
+                <span className="min-w-0">{h}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="hidden text-right md:block">
