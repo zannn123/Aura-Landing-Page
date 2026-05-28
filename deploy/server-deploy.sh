@@ -108,17 +108,26 @@ ok "Deploy complete (sha: $(git rev-parse --short HEAD))"
 
 # --- Diagnostics: what is actually serving :$SERVE_PORT? ----------------
 log "Diagnosing serving on :$SERVE_PORT"
-echo "--- listeners on :$SERVE_PORT ---"
-(ss -tlnp 2>/dev/null || sudo -n ss -tlnp 2>/dev/null || true) | grep -E "[:.]${SERVE_PORT}\b" | sed 's/^/    /' || echo "    (nothing)"
-echo "--- pm2 list ---"
-pm2 list 2>/dev/null | sed 's/^/    /' || echo "    (pm2 not running)"
-echo "--- pm2 logs aura-landing-page (last 20 lines) ---"
-pm2 logs "$PM2_APP_NAME" --nostream --lines 20 2>/dev/null | sed 's/^/    /' || true
-echo "--- index.html as served on :$SERVE_PORT ---"
+
+echo "--- :$SERVE_PORT listener (sudo -n ss -tlnp) ---"
+sudo -n ss -tlnp 2>&1 | grep -E "[:.]${SERVE_PORT}\b" | sed 's/^/    /' || echo "    (none or sudo failed)"
+
+echo "--- pm2 describe $PM2_APP_NAME ---"
+pm2 describe "$PM2_APP_NAME" 2>&1 | grep -E "(pid|status|restarts|uptime|exec cwd|script args|exit code|out log path|error log path|created at)" | sed 's/^/    /' || true
+
+echo "--- pm2 error log tail ---"
+ERR_LOG="$HOME/.pm2/logs/${PM2_APP_NAME}-error.log"
+if [ -f "$ERR_LOG" ]; then
+  tail -30 "$ERR_LOG" 2>&1 | sed 's/^/    /'
+else
+  echo "    (no error log at $ERR_LOG)"
+fi
+
+echo "--- dist/version.json on disk ---"
+cat "$APP_DIR/dist/version.json" 2>&1 | sed 's/^/    /' || echo "    (missing)"
+
+echo "--- curl localhost:$SERVE_PORT/version.json ---"
 curl -s --max-time 5 "http://127.0.0.1:${SERVE_PORT}/version.json" | sed 's/^/    /' || echo "    (curl failed)"
-echo "--- nginx server blocks listening on :$SERVE_PORT (if any) ---"
-(sudo -n nginx -T 2>/dev/null || nginx -T 2>/dev/null || true) | awk -v p="$SERVE_PORT" '
-  /server\s*{/ { inblock=1; buf=""; has=0 }
-  inblock { buf=buf $0 "\n"; if ($0 ~ "listen.*"p) has=1 }
-  inblock && /^}/ { if (has) print buf; inblock=0 }
-' | sed 's/^/    /' || true
+
+echo "--- nginx config grep for :$SERVE_PORT (sudo -n nginx -T) ---"
+sudo -n nginx -T 2>&1 | grep -E "(listen .*${SERVE_PORT}|root |alias |proxy_pass )" | sed 's/^/    /' | head -40 || echo "    (sudo failed or nginx absent)"
