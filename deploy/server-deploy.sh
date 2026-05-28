@@ -51,12 +51,24 @@ if ! command -v node >/dev/null 2>&1; then
 fi
 
 log "Installing dependencies (npm ci, including devDeps)"
-# --include=dev forces devDependencies even when NODE_ENV=production is
-# set on the host, which is needed because vite is a devDependency.
-npm ci --no-audit --no-fund --include=dev
+# Force devDependencies on the server even if NODE_ENV=production or a
+# host-level .npmrc sets production=true / omit=dev — vite is a devDep.
+NODE_ENV=development npm ci --no-audit --no-fund --include=dev --production=false
+
+if [ ! -x "node_modules/.bin/vite" ]; then
+  warn "node_modules/.bin/vite still missing after npm ci — dumping npm config for diagnosis"
+  echo "--- npm config ---"; npm config list -l 2>&1 | sed 's/^/    /'
+  echo "--- vite package present? ---"; ls -la node_modules/vite 2>&1 | sed 's/^/    /' || true
+  echo "--- .bin/ entries ---"; ls node_modules/.bin/ 2>&1 | sed 's/^/    /' || true
+  warn "Attempting fallback: explicit install of vite"
+  npm install --no-save --no-audit --no-fund vite @vitejs/plugin-react
+fi
 
 log "Building"
-npm run build
+# Call vite directly (rather than via `npm run`) so we don't depend on
+# whatever shell `npm run` spawns finding ./node_modules/.bin on PATH.
+node ./scripts/sync-version.mjs
+node ./node_modules/vite/bin/vite.js build
 
 # --- Restart server process ---------------------------------------------
 if command -v pm2 >/dev/null 2>&1; then
