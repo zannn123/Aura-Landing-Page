@@ -105,3 +105,20 @@ else
 fi
 
 ok "Deploy complete (sha: $(git rev-parse --short HEAD))"
+
+# --- Diagnostics: what is actually serving :$SERVE_PORT? ----------------
+log "Diagnosing serving on :$SERVE_PORT"
+echo "--- listeners on :$SERVE_PORT ---"
+(ss -tlnp 2>/dev/null || sudo -n ss -tlnp 2>/dev/null || true) | grep -E "[:.]${SERVE_PORT}\b" | sed 's/^/    /' || echo "    (nothing)"
+echo "--- pm2 list ---"
+pm2 list 2>/dev/null | sed 's/^/    /' || echo "    (pm2 not running)"
+echo "--- pm2 logs aura-landing-page (last 20 lines) ---"
+pm2 logs "$PM2_APP_NAME" --nostream --lines 20 2>/dev/null | sed 's/^/    /' || true
+echo "--- index.html as served on :$SERVE_PORT ---"
+curl -s --max-time 5 "http://127.0.0.1:${SERVE_PORT}/version.json" | sed 's/^/    /' || echo "    (curl failed)"
+echo "--- nginx server blocks listening on :$SERVE_PORT (if any) ---"
+(sudo -n nginx -T 2>/dev/null || nginx -T 2>/dev/null || true) | awk -v p="$SERVE_PORT" '
+  /server\s*{/ { inblock=1; buf=""; has=0 }
+  inblock { buf=buf $0 "\n"; if ($0 ~ "listen.*"p) has=1 }
+  inblock && /^}/ { if (has) print buf; inblock=0 }
+' | sed 's/^/    /' || true
