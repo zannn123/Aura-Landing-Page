@@ -134,7 +134,10 @@ try {
       version: payload.version,
       buildNumber: payload.buildNumber,
       releasedAt: new Date().toISOString().slice(0, 10),
-      note: null
+      // Generic placeholder — edit public/versions-history.json directly
+      // to give a release a specific note. The auto-prepend respects an
+      // existing top entry, so manual edits are not overwritten.
+      note: "New build — rolling improvements and fixes."
     });
     // Cap history length so the file stays small
     if (history.history.length > 30) history.history = history.history.slice(0, 30);

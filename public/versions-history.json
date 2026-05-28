@@ -1,6 +1,12 @@
 {
   "history": [
     {
+      "version": "1.36.0",
+      "buildNumber": "2080",
+      "releasedAt": "2026-05-28",
+      "note": "Latest pilot-merge build. CI-driven build numbering, faster release cadence."
+    },
+    {
       "version": "1.33.2",
       "buildNumber": "75",
       "releasedAt": "2026-05-24",
