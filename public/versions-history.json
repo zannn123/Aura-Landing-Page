@@ -4,13 +4,17 @@
       "version": "1.36.2",
       "buildNumber": "4082",
       "releasedAt": "2026-05-28",
-      "note": "Officer-side attendance tools — manual marking, inline row actions, and a live-updating searchable roster.",
+      "note": "Officer-side attendance tools, polished typography and motion, and a status engine that never mislabels Absent.",
       "highlights": [
-        "Officers with manage_attendance can now mark students present without a face scan — FAB \"Add attendance\" plus a searchable picker that hits POST /api/attendance/manual with full governance context.",
+        "Officers with manage_attendance can now mark students present without a face scan — \"Add attendance\" FAB plus a searchable picker, with full governance context posted on the manual entry.",
         "Inline per-row \"Mark present\" and \"Sign out\" actions directly on the event monitor.",
         "Searchable roster with name, mono student ID, time-in / time-out pills, status-tinted avatar, and status chip — replaces the old \"Student #142\" rows.",
-        "Filter pills — All · Present · Late · Absent — with mono count badges.",
+        "Sliding filter pills — All · Present · Late · Absent — with a status-colored active label and mono count badges.",
         "Smart-poll on attendees so check-ins appear without a manual refresh.",
+        "Real Manrope typography across the attendee surface — initials, filter labels, row names, FAB, and action buttons now render in proper Manrope weights instead of falling back to Roboto.",
+        "Press-scale plus staggered entrance motion on the FAB, rows, and inline actions (40 ms stagger capped at 8, honors reduce-motion).",
+        "Focus halo with accent shadow and icon tint on the search field.",
+        "\"Absent never lies\" — a student who has checked in but not yet signed out is now correctly labeled incomplete, never Absent, regardless of what the backend's display_status returns.",
         "Backend wiring fix: GovUserSummary.studentProfileId is now the FK that actually matches attendances.student_id, so officer dashboards line up with the underlying records."
       ]
     },
