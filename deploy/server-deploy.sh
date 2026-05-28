@@ -70,19 +70,38 @@ log "Building"
 node ./scripts/sync-version.mjs
 node ./node_modules/vite/bin/vite.js build
 
+# --- Ensure pm2 + serve are installed -----------------------------------
+ensure_pm2() {
+  if command -v pm2 >/dev/null 2>&1 && command -v serve >/dev/null 2>&1; then
+    return 0
+  fi
+  log "Installing pm2 + serve globally"
+  if npm i -g pm2 serve >/dev/null 2>&1; then
+    return 0
+  fi
+  if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+    log "Retrying global install with sudo"
+    sudo -n npm i -g pm2 serve
+    return $?
+  fi
+  warn "Could not install pm2/serve globally (no passwordless sudo)."
+  warn "Run once manually:  sudo npm i -g pm2 serve"
+  return 1
+}
+
 # --- Restart server process ---------------------------------------------
-if command -v pm2 >/dev/null 2>&1; then
+if ensure_pm2; then
   if pm2 describe "$PM2_APP_NAME" >/dev/null 2>&1; then
     log "Reloading PM2 process: $PM2_APP_NAME"
     pm2 reload "$PM2_APP_NAME" --update-env
   else
     log "Starting PM2 process: $PM2_APP_NAME (serve dist on :$SERVE_PORT)"
-    pm2 start npx --name "$PM2_APP_NAME" -- serve -s dist -l "$SERVE_PORT"
+    pm2 start "$(command -v serve)" --name "$PM2_APP_NAME" -- -s dist -l "$SERVE_PORT"
     pm2 save || true
+    warn "First-time PM2 start: run \`pm2 startup\` once on the server (interactively) so the daemon survives reboots."
   fi
 else
-  warn "pm2 not installed — built dist/ but did NOT restart any server process."
-  warn "To set up serving:  npm i -g pm2 serve  &&  pm2 start npx --name $PM2_APP_NAME -- serve -s dist -l $SERVE_PORT"
+  warn "Skipped process restart — dist/ is built and ready at $APP_DIR/dist."
 fi
 
 ok "Deploy complete (sha: $(git rev-parse --short HEAD))"
