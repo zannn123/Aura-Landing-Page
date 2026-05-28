@@ -1,0 +1,66 @@
+name: Deploy to Server
+
+# Continuous deployment: on every push to main, SSH into the server
+# and run deploy/server-deploy.sh, which pulls the new code, installs
+# deps, builds the site, and reloads the PM2 process if present.
+#
+# Required repository secrets:
+#   SERVER_HOST     - public IP / hostname (e.g. 18.142.190.113)
+#   SERVER_USER     - SSH user (e.g. ubuntu)
+#   SERVER_PORT     - SSH port (e.g. 22)
+#   SERVER_APP_DIR  - ABSOLUTE path on server (e.g. /home/ubuntu/Aura/Testing/Aura-Landing-Page)
+#   SERVER_SSH_KEY  - private key (PEM) with access to SERVER_USER@SERVER_HOST
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Trust server host key
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -p "${SERVER_PORT:-22}" -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Run server deploy
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          SERVER_APP_DIR: ${{ secrets.SERVER_APP_DIR }}
+          GIT_REMOTE: https://github.com/${{ github.repository }}.git
+          GIT_REF: ${{ github.ref_name }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          ssh -p "${SERVER_PORT:-22}" \
+              "${SERVER_USER}@${SERVER_HOST}" \
+              "APP_DIR='${SERVER_APP_DIR}' \
+               GIT_REMOTE='${GIT_REMOTE}' \
+               GIT_REF='${GIT_REF}' \
+               GIT_SHA='${GIT_SHA}' \
+               bash -s" < deploy/server-deploy.sh
