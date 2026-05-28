@@ -50,8 +50,10 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-log "Installing dependencies (npm ci)"
-npm ci --no-audit --no-fund
+log "Installing dependencies (npm ci, including devDeps)"
+# --include=dev forces devDependencies even when NODE_ENV=production is
+# set on the host, which is needed because vite is a devDependency.
+npm ci --no-audit --no-fund --include=dev
 
 log "Building"
 npm run build

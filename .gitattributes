@@ -1,0 +1,4 @@
+* text=auto
+
+# Always commit shell scripts with LF — they run on Linux servers
+*.sh text eol=lf
