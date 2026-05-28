@@ -124,22 +124,37 @@ try {
     history = JSON.parse(readFileSync(historyPath, "utf-8"));
     if (!Array.isArray(history.history)) history.history = [];
   }
-  const top = history.history[0];
-  const matchesTop =
-    top &&
-    top.version === payload.version &&
-    String(top.buildNumber || "") === String(payload.buildNumber || "");
-  if (!matchesTop) {
+  // Match on versionName ONLY. Same-version rebuilds (per-ABI split codes,
+  // CI build offsets, etc.) should refresh the buildNumber on the existing
+  // row rather than creating a duplicate. New versionNames get prepended.
+  const existingIdx = history.history.findIndex(
+    (e) => e && e.version === payload.version
+  );
+  if (existingIdx >= 0) {
+    const existing = history.history[existingIdx];
+    let changed = false;
+    if (
+      payload.buildNumber &&
+      String(existing.buildNumber || "") !== String(payload.buildNumber)
+    ) {
+      existing.buildNumber = payload.buildNumber;
+      changed = true;
+    }
+    if (changed) {
+      writeFileSync(historyPath, JSON.stringify(history, null, 2) + "\n");
+      console.log(
+        `[sync-version] refreshed buildNumber on existing ${payload.version} → ${payload.buildNumber}`
+      );
+    }
+  } else {
     history.history.unshift({
       version: payload.version,
       buildNumber: payload.buildNumber,
       releasedAt: new Date().toISOString().slice(0, 10),
       // Generic placeholder — edit public/versions-history.json directly
-      // to give a release a specific note. The auto-prepend respects an
-      // existing top entry, so manual edits are not overwritten.
+      // (note + optional highlights array) to give a release real text.
       note: "New build — rolling improvements and fixes."
     });
-    // Cap history length so the file stays small
     if (history.history.length > 30) history.history = history.history.slice(0, 30);
     writeFileSync(historyPath, JSON.stringify(history, null, 2) + "\n");
     console.log(`[sync-version] prepended ${label} to versions-history.json`);
