@@ -2,8 +2,8 @@
   "name": "aura-landing-page",
   "private": true,
   "version": "0.0.0",
-  "auraAppVersion": "1.36.1",
-  "auraAppBuildNumber": "4081",
+  "auraAppVersion": "1.36.2",
+  "auraAppBuildNumber": "4082",
   "type": "module",
   "scripts": {
     "sync-version": "node scripts/sync-version.mjs",
