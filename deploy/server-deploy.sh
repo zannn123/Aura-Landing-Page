@@ -131,3 +131,15 @@ curl -s --max-time 5 "http://127.0.0.1:${SERVE_PORT}/version.json" | sed 's/^/  
 
 echo "--- nginx config grep for :$SERVE_PORT (sudo -n nginx -T) ---"
 sudo -n nginx -T 2>&1 | grep -E "(listen .*${SERVE_PORT}|root |alias |proxy_pass )" | sed 's/^/    /' | head -40 || echo "    (sudo failed or nginx absent)"
+
+echo "--- docker container publishing :$SERVE_PORT ---"
+(docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Command}}' 2>&1 || sudo -n docker ps --format 'table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Command}}' 2>&1) | grep -E "(CONTAINER|${SERVE_PORT})" | sed 's/^/    /' || echo "    (docker inaccessible)"
+
+echo "--- inspect: source path / volume / compose project of that container ---"
+CID=$( (docker ps --format '{{.ID}} {{.Ports}}' 2>/dev/null || sudo -n docker ps --format '{{.ID}} {{.Ports}}' 2>/dev/null) | awk -v p="$SERVE_PORT" '$0 ~ ":"p"->" {print $1; exit}')
+if [ -n "$CID" ]; then
+  echo "    container id: $CID"
+  (docker inspect "$CID" 2>/dev/null || sudo -n docker inspect "$CID" 2>/dev/null) | \
+    grep -E "\"(Image|WorkingDir|Source|Destination|com.docker.compose.project|com.docker.compose.project.working_dir|com.docker.compose.service|com.docker.compose.config-hash)\"" | \
+    sed 's/^/    /'
+fi
